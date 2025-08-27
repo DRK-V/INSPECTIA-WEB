@@ -1,2 +1,0 @@
-# INSPECTIA-WEB
-proyecto entrega INGENIERIA WEB
