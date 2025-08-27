@@ -1,9 +1,11 @@
 import React from 'react';
 import { Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from './UserContext';
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const { user, logout } = useUser();
 
   return (
     <header className="bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
@@ -30,12 +32,33 @@ export default function Navbar() {
               Contacto
             </a>
           </nav>
-          <button
-            className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors"
-            onClick={() => navigate('/login')}
-          >
-            Iniciar sesión
-          </button>
+          <div className="flex gap-4 items-center">
+            {/* Mostrar Dashboard si está logueado */}
+            {user && (
+              <button
+                className="text-purple-600 font-medium hover:underline"
+                onClick={() => navigate('/dashboard')}
+              >
+                Dashboard
+              </button>
+            )}
+            {/* Botón de login/logout */}
+            {!user ? (
+              <button
+                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+                onClick={() => navigate('/login')}
+              >
+                Iniciar sesión
+              </button>
+            ) : (
+              <button
+                className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+                onClick={logout}
+              >
+                Cerrar sesión
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </header>
