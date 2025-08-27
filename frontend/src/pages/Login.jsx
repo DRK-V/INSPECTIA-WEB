@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useUser } from '../components/UserContext';
 
 export default function Login() {
+  const { login, usuarios } = useUser();
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -17,6 +19,11 @@ export default function Login() {
       setError('Credenciales incorrectas')
     }
   }
+
+  const handleLogin = (username) => {
+    login(username);
+    navigate('/dashboard');
+  };
 
   return (
     <div className="flex flex-1 items-center justify-center bg-gray-100 py-20">
@@ -59,6 +66,20 @@ export default function Login() {
         </div>
         <div className="mt-4 text-xs text-gray-400 text-center">
           Usuario demo: usuario@demo.com / demo123
+        </div>
+        <div className="mt-8">
+          <h1 className="text-2xl font-bold mb-6 text-center">Selecciona tu usuario</h1>
+          <div className="space-y-4">
+            {usuarios.map(u => (
+              <button
+                key={u.username}
+                className="w-full bg-purple-600 text-white px-6 py-3 rounded font-medium hover:bg-purple-700"
+                onClick={() => handleLogin(u.username)}
+              >
+                {u.nombre} ({u.rol})
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
