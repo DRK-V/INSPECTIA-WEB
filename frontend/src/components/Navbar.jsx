@@ -63,7 +63,7 @@ export default function Navbar() {
             </button>
           </nav>
 
-          {/* Botón de usuario / login */}
+        
           <div className="flex gap-4 items-center relative">
             {!user ? (
               <button
@@ -96,9 +96,9 @@ export default function Navbar() {
                     </button>
                     <button
                       onClick={() => {
-                        logout(); // Limpia el contexto y el localStorage
-                        setOpen(false); // Cierra el menú desplegable
-                        navigate("/"); // Redirige al home
+                        logout(); 
+                        setOpen(false);
+                        navigate("/"); 
                       }}
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-100"
                     >

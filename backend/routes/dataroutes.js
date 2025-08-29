@@ -5,28 +5,20 @@ const {
   // Usuarios
   registerUser,
   loginUser,
-  checkEmail,
-  resetPassword,
-  getUsers,
   getUserById,
-  getCasoById,
-  updateUser,
-  deleteUser,
-  getProyectoById,
   // Proyectos
+  getProyectoById,
   createProyecto,
   getProyectosByUsuario,
   getAllProyectos,
   downloadArchivoHU,
-  generarCasosPrueba,
-updateCasoPruebaEstado,
+  updateCasoPruebaEstado,
   asignarProyecto,
-
-  // Casos de prueba
-
   getCasosByProyecto,
 
-  
+  // Casos de prueba
+  generarCasosPrueba,
+  getCasoById,
   validarCasosProyecto,
   // Evidencias
   createEvidencia,
@@ -42,22 +34,17 @@ router.post("/ejecuciones", crearEjecucion);
 router.get("/ejecuciones/:casoId", obtenerEjecucionesPorCaso);
 router.put("/casos/:casoId/estado", updateCasoPruebaEstado);
 
-
-
 router.post("/evidencias", upload.single("archivo"), subirEvidencia);
 router.get("/evidencias/:ejecucionId", obtenerEvidenciasPorEjecucion);
 /* ---------------------- USUARIOS ---------------------- */
 // Autenticación
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.post("/checkEmail", checkEmail);
-router.post("/resetPassword", resetPassword);
+
 
 // CRUD usuarios
-router.get("/users", getUsers);
+
 router.get("/users/:id", getUserById);
-router.put("/users/:id", updateUser);
-router.delete("/users/:id", deleteUser);
 
 /* ---------------------- PROYECTOS ---------------------- */
 router.post("/create", upload.single("archivo_hu"), createProyecto);
@@ -74,7 +61,6 @@ router.get("/casos/:id", getCasoById);
 router.get("/proyectos/:proyecto_id/casos", getCasosByProyecto);
 
 /* -------------------- EJECUCIONES ---------------------- */
-
 
 /* --------------------- EVIDENCIAS ---------------------- */
 router.post("/evidencias", createEvidencia);

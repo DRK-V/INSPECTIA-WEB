@@ -15,7 +15,7 @@ function Dashboard() {
   const [selectedUsuarios, setSelectedUsuarios] = useState([]);
   const navigate = useNavigate();
 
-  // 🔹 Cargar proyectos
+  //  Cargar proyectos
   useEffect(() => {
     if (!user) return;
 
@@ -31,7 +31,7 @@ function Dashboard() {
         let data = await res.json();
         console.log("📥 Proyectos recibidos del backend:", data);
 
-        // 🔹 Si es manager → validar casos
+        //  Si es manager → validar casos
         if (user.rol === "manager") {
           const proyectosConValidacion = await Promise.all(
             data.map(async (p) => {
@@ -51,7 +51,7 @@ function Dashboard() {
           console.log("📊 Proyectos manager con validación:", data);
         }
 
-        // 🔹 Si es tester → filtrar solo los proyectos asignados a él
+        //  Si es tester → filtrar solo los proyectos asignados a él
         if (user.rol === "tester") {
           data = data.filter((p) => {
             if (!p.asignado_a) return false;
@@ -80,12 +80,12 @@ function Dashboard() {
     fetchProyectos();
   }, [user]);
 
-  // 🔹 Crear nuevo proyecto
+  //  Crear nuevo proyecto
   const handleProyectoCreado = (nuevoProyecto) => {
     setProyectos((prev) => [...prev, nuevoProyecto]);
   };
 
-  // 🔹 Ver casos (para manager/tester)
+  //  Ver casos (para manager/tester)
   const verCasos = async (proyectoId) => {
     try {
       // Guardar proyectoId en cookies 👇
@@ -104,7 +104,7 @@ function Dashboard() {
     }
   };
 
-  // 🔹 Subir evidencia (tester)
+  //  Subir evidencia (tester)
   const subirEvidencia = async (casoId, archivo, estado) => {
     const formData = new FormData();
     formData.append("caso_id", casoId);
@@ -132,7 +132,7 @@ function Dashboard() {
     }
   };
 
-  // ----------------- 🔹 Asignación de proyectos -----------------
+  // -----------------  Asignación de proyectos -----------------
   const abrirAsignarModal = async (proyecto) => {
     setSelectedProyecto(proyecto);
     try {
@@ -251,7 +251,6 @@ function Dashboard() {
             </div>
           )}
 
-          {/* Modal nuevo proyecto */}
           <NuevoProyectoModal
             isOpen={modalOpen}
             onClose={() => setModalOpen(false)}
@@ -396,7 +395,7 @@ function Dashboard() {
                     <td className="py-3 px-4">{p.descripcion}</td>
                     <td className="py-3 px-4">
                       <button
-                        onClick={() => verCasos(p.id)} // 👈 guarda en cookies
+                        onClick={() => verCasos(p.id)} 
                         className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
                       >
                         Ver Casos

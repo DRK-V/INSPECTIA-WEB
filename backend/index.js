@@ -4,7 +4,7 @@ const userRoutes = require('./routes/dataroutes');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-const path = require("path"); // 👈 IMPORTANTE
+const path = require("path"); 
 require('dotenv').config();
 
 const app = express();

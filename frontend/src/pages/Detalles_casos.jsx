@@ -15,14 +15,14 @@ export default function CasoDetalle({ rol = "tester" }) {
   const [ejecucionId, setEjecucionId] = useState(null);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
-  // 👇 manejo de evidencias por comentario (cacheadas)
+  //manejo de evidencias por comentario (cacheadas)
   const [evidencias, setEvidencias] = useState({});
   const [comentarioExpandido, setComentarioExpandido] = useState(null);
 
   const proyectoId = Cookies.get("proyectoId");
   const testerId = Cookies.get("testerId") || 1;
 
-  // 🔹 carga caso + proyecto
+  //carga caso + proyecto
   useEffect(() => {
     const fetchCasoYProyecto = async () => {
       try {
@@ -60,7 +60,7 @@ export default function CasoDetalle({ rol = "tester" }) {
     fetchCasoYProyecto();
   }, [casoId, proyectoId]);
 
-  // 🔹 carga comentarios
+  //carga comentarios
   useEffect(() => {
     const fetchComentarios = async () => {
       try {
@@ -97,7 +97,7 @@ export default function CasoDetalle({ rol = "tester" }) {
 
   const handleFileChange = (e) => setImagenes([...imagenes, ...e.target.files]);
 
-  // 🔹 guardar comentario nuevo
+  // guardar comentario nuevo
   const handleGuardar = async () => {
     try {
       const res = await fetch("http://localhost:3000/api/users/ejecuciones", {
@@ -147,7 +147,7 @@ export default function CasoDetalle({ rol = "tester" }) {
     }
   };
 
-  // 🔹 toggle desplegar comentario con evidencias
+  // toggle desplegar comentario con evidencias
   const toggleComentario = async (ejecucionId) => {
     if (comentarioExpandido === ejecucionId) {
       setComentarioExpandido(null);
@@ -181,7 +181,7 @@ export default function CasoDetalle({ rol = "tester" }) {
       </div>
 
       <div className="grid grid-cols-3 gap-6">
-        {/* Columna izquierda */}
+      
         <div className="col-span-2 space-y-6">
           {/* Description */}
           <section className="bg-white shadow rounded p-4">
@@ -306,7 +306,7 @@ export default function CasoDetalle({ rol = "tester" }) {
           )}
         </div>
 
-        {/* Columna derecha */}
+   
         <div className="col-span-1 space-y-6">
           <section className="bg-white shadow rounded p-4">
             <h3 className="text-lg font-semibold mb-2">Plan</h3>

@@ -27,8 +27,8 @@ export default function Login() {
       const data = await res.json();
       console.log("Usuario logueado:", data.user);
 
-      login(data.user); // Guardamos SOLO el usuario
-      navigate("/"); // Redirigir al home
+      login(data.user); 
+      navigate("/");
     } catch (err) {
       setError("Credenciales incorrectas");
     } finally {

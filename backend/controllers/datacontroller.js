@@ -94,68 +94,6 @@ const loginUser = async (req, res) => {
   }
 };
 
-// Verificar email
-const checkEmail = async (req, res) => {
-  const { email } = req.body;
-  try {
-    const { data, error } = await supabase
-      .from("usuarios")
-      .select("id, email")
-      .eq("email", email)
-      .single();
-
-    if (error || !data)
-      return res.status(404).json({ message: "Correo no encontrado" });
-
-    res.json({ id: data.id, email: data.email });
-  } catch (err) {
-    res.status(500).json({ message: "Error al verificar el correo" });
-  }
-};
-
-// Reset password
-const resetPassword = async (req, res) => {
-  const { id, email, password } = req.body;
-
-  if (!id || !email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Los campos id, email y password son requeridos." });
-  }
-
-  try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const { error } = await supabase
-      .from("usuarios")
-      .update({ password_hash: hashedPassword })
-      .eq("id", id)
-      .eq("email", email);
-
-    if (error)
-      return res
-        .status(500)
-        .json({ message: "Error al cambiar la contraseña." });
-
-    res.json({ message: "Contraseña cambiada con éxito." });
-  } catch (err) {
-    res.status(500).json({ message: "Error al procesar la solicitud." });
-  }
-};
-
-// Obtener todos los usuarios
-const getUsers = async (req, res) => {
-  try {
-    const { data, error } = await supabase.from("usuarios").select("*");
-
-    if (error) return res.status(500).json({ message: error.message });
-
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ message: "Error al obtener usuarios." });
-  }
-};
-
 // Obtener usuario por ID
 const getUserById = async (req, res) => {
   const { id } = req.params;
@@ -173,48 +111,6 @@ const getUserById = async (req, res) => {
     res.json(data);
   } catch (err) {
     res.status(500).json({ message: "Error al obtener usuario." });
-  }
-};
-
-// Actualizar usuario
-const updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { nombre, apellido, telefono, empresa, rol } = req.body;
-
-  try {
-    const { data, error } = await supabase
-      .from("usuarios")
-      .update({
-        nombre,
-        apellido,
-        telefono,
-        empresa,
-        rol,
-        fecha_actualizacion: new Date(),
-      })
-      .eq("id", id)
-      .select();
-
-    if (error) return res.status(500).json({ message: error.message });
-
-    res.json({ message: "Usuario actualizado correctamente.", user: data[0] });
-  } catch (err) {
-    res.status(500).json({ message: "Error al actualizar usuario." });
-  }
-};
-
-// Eliminar usuario
-const deleteUser = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const { error } = await supabase.from("usuarios").delete().eq("id", id);
-
-    if (error) return res.status(500).json({ message: error.message });
-
-    res.json({ message: "Usuario eliminado correctamente." });
-  } catch (err) {
-    res.status(500).json({ message: "Error al eliminar usuario." });
   }
 };
 
@@ -240,8 +136,6 @@ const createProyecto = async (req, res) => {
       });
     }
 
-    // ✅ Normalizar tipo_aplicacion
-    // Si viene como string ("Web") lo pasamos a array ["Web"]
     if (tipo_aplicacion && typeof tipo_aplicacion === "string") {
       try {
         // intentar parsear si viene como JSON string (ej: '["Web","Móvil"]')
@@ -339,9 +233,7 @@ const getProyectosByUsuario = async (req, res) => {
 // Obtener todos los proyectos
 const getAllProyectos = async (req, res) => {
   try {
-   const { data, error } = await supabase
-  .from("proyectos")
-  .select(`
+    const { data, error } = await supabase.from("proyectos").select(`
     id,
     nombre_proyecto,
     descripcion,
@@ -351,7 +243,6 @@ const getAllProyectos = async (req, res) => {
     asignado_a,
     usuarios:usuario_id (id, nombre)
   `);
-
 
     if (error) {
       console.error("Error Supabase:", error);
@@ -368,7 +259,7 @@ const getAllProyectos = async (req, res) => {
   }
 };
 
-// 🔹 Obtener un caso de prueba por ID
+// Obtener un caso de prueba por ID
 const getCasoById = async (req, res) => {
   const { id } = req.params;
 
@@ -406,19 +297,20 @@ const getCasoById = async (req, res) => {
   }
 };
 
-
 const getProyectoById = async (req, res) => {
   try {
     const { id } = req.params; // se obtiene de la URL: /proyectos/:id
 
     const { data, error } = await supabase
       .from("proyectos")
-      .select(`
+      .select(
+        `
         nombre_proyecto,
         url_sitio,
         url_descarga,
         tipo_aplicacion
-      `)
+      `
+      )
       .eq("id", id)
       .single(); // trae un solo registro
 
@@ -436,9 +328,6 @@ const getProyectoById = async (req, res) => {
     });
   }
 };
-
-
-
 
 // Descargar archivo HU por id de proyecto
 const downloadArchivoHU = async (req, res) => {
@@ -505,8 +394,6 @@ const asignarProyecto = async (req, res) => {
   }
 };
 
-
-
 const validarCasosProyecto = async (req, res) => {
   const { proyecto_id } = req.params;
 
@@ -549,8 +436,6 @@ const validarCasosProyecto = async (req, res) => {
   }
 };
 
-
-
 const generarCasosPrueba = async (req, res) => {
   try {
     const { proyecto_id } = req.params;
@@ -572,7 +457,9 @@ const generarCasosPrueba = async (req, res) => {
 
     if (!proyecto.archivo_hu) {
       console.error("❌ Proyecto sin archivo HU");
-      return res.status(404).json({ message: "El proyecto no tiene archivo HU" });
+      return res
+        .status(404)
+        .json({ message: "El proyecto no tiene archivo HU" });
     }
 
     const filePath = path.join(__dirname, "..", proyecto.archivo_hu);
@@ -580,7 +467,9 @@ const generarCasosPrueba = async (req, res) => {
 
     if (!fs.existsSync(filePath)) {
       console.error("❌ Archivo HU no existe:", filePath);
-      return res.status(404).json({ message: "Archivo HU no encontrado en servidor" });
+      return res
+        .status(404)
+        .json({ message: "Archivo HU no encontrado en servidor" });
     }
 
     // 2. Leer Excel
@@ -624,7 +513,10 @@ NO devuelvas explicaciones, solo el JSON válido.
     });
 
     const result = await response.json();
-    console.log("📩 Respuesta cruda de Gemini:", JSON.stringify(result, null, 2));
+    console.log(
+      "📩 Respuesta cruda de Gemini:",
+      JSON.stringify(result, null, 2)
+    );
 
     // 5. Extraer JSON
     let casosPrueba = [];
@@ -637,7 +529,10 @@ NO devuelvas explicaciones, solo el JSON válido.
 
       console.log("📜 Texto recibido de Gemini:", rawText);
 
-      rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+      rawText = rawText
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
 
       try {
         casosPrueba = JSON.parse(rawText);
@@ -653,7 +548,9 @@ NO devuelvas explicaciones, solo el JSON válido.
 
     if (casosPrueba.length === 0) {
       console.error("⚠️ Gemini no generó casos de prueba");
-      return res.status(400).json({ message: "Gemini no generó casos de prueba" });
+      return res
+        .status(400)
+        .json({ message: "Gemini no generó casos de prueba" });
     }
 
     // 6. Insertar en Supabase
@@ -689,13 +586,6 @@ NO devuelvas explicaciones, solo el JSON válido.
   }
 };
 
-
-
-
-
-
-
-
 // Obtener casos de prueba por historia
 const getCasosByProyecto = async (req, res) => {
   const { proyecto_id } = req.params;
@@ -714,15 +604,12 @@ const getCasosByProyecto = async (req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ message: "Error al obtener casos de prueba por proyecto.", error: err.message });
+      .json({
+        message: "Error al obtener casos de prueba por proyecto.",
+        error: err.message,
+      });
   }
 };
-
-
-
-
-
-
 
 // Configuración de almacenamiento para archivos
 const storage = multer.diskStorage({
@@ -736,14 +623,14 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     const uniqueName = Date.now() + "-" + file.originalname;
     cb(null, uniqueName);
-  }
+  },
 });
 
 const upload = multer({ storage });
 
 // ====================== CONTROLADORES ======================
 
-// 📌 Crear ejecución
+//  Crear ejecución
 const crearEjecucion = async (req, res) => {
   try {
     const { caso_id, tester_id, resultado, comentarios } = req.body;
@@ -765,7 +652,7 @@ const crearEjecucion = async (req, res) => {
   }
 };
 
-// 📌 Obtener ejecuciones por caso_id
+//  Obtener ejecuciones por caso_id
 const obtenerEjecucionesPorCaso = async (req, res) => {
   try {
     const { casoId } = req.params;
@@ -784,7 +671,7 @@ const obtenerEjecucionesPorCaso = async (req, res) => {
   }
 };
 
-// 📌 Subir evidencia
+//  Subir evidencia
 const subirEvidencia = async (req, res) => {
   try {
     const { ejecucion_id, tipo } = req.body;
@@ -850,22 +737,20 @@ const obtenerEvidenciasPorEjecucion = async (req, res) => {
   }
 };
 
-
-
-
-
-// 📌 Actualizar estado de un caso de prueba
+//  Actualizar estado de un caso de prueba
 const updateCasoPruebaEstado = async (req, res) => {
   try {
-    const { casoId } = req.params;   // ID desde la URL
-    const { estado } = req.body;     // Nuevo estado desde el body
+    const { casoId } = req.params; // ID desde la URL
+    const { estado } = req.body; // Nuevo estado desde el body
 
     if (!estado) {
-      return res.status(400).json({ message: "El campo 'estado' es obligatorio." });
+      return res
+        .status(400)
+        .json({ message: "El campo 'estado' es obligatorio." });
     }
 
     const { data, error } = await supabase
-      .from("casos_prueba")   // 👈 nombre correcto de la tabla
+      .from("casos_prueba") // 👈 nombre correcto de la tabla
       .update({ estado })
       .eq("id", casoId)
       .select();
@@ -885,10 +770,6 @@ const updateCasoPruebaEstado = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-
-
-
 
 // Obtener ejecuciones por caso
 const getEjecucionesByCaso = async (req, res) => {
@@ -952,15 +833,10 @@ const getEvidenciasByEjecucion = async (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
-  checkEmail,
-  resetPassword,
-  getUsers,
   getUserById,
-  updateUser,
-  deleteUser,
   createProyecto,
   getProyectosByUsuario,
-asignarProyecto,
+  asignarProyecto,
   getCasosByProyecto,
   getEjecucionesByCaso,
   createEvidencia,
@@ -972,9 +848,9 @@ asignarProyecto,
   getCasoById,
   getProyectoById,
 
-updateCasoPruebaEstado,
+  updateCasoPruebaEstado,
   crearEjecucion,
   subirEvidencia,
   obtenerEjecucionesPorCaso,
-  obtenerEvidenciasPorEjecucion
+  obtenerEvidenciasPorEjecucion,
 };

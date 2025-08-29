@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import RegisterForm from '../components/Auth/RegisterForm.jsx'
+
 import { useNavigate } from 'react-router-dom'
 
 export default function Register() {

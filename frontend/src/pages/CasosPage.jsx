@@ -9,7 +9,7 @@ export default function CasosPage() {
   const { user } = useUser();
   const navigate = useNavigate();
 
-  // 🔹 Normalizar estado
+  // Normalizar estado
   const normalizarEstado = (estado) => (estado || "").toLowerCase();
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function CasosPage() {
     fetchCasos();
   }, [id]);
 
-  // 🔹 Cambiar estado en backend
+  // Cambiar estado en backend
   const handleChangeEstado = async (casoId, nuevoEstado) => {
     try {
       const res = await fetch(
@@ -53,7 +53,7 @@ export default function CasosPage() {
     }
   };
 
-  // 🔹 Drag & Drop
+  // Drag & Drop
   const onDragEnd = (result) => {
     if (!result.destination) return;
 
@@ -73,7 +73,7 @@ export default function CasosPage() {
     handleChangeEstado(casoId, nuevoEstado);
   };
 
-  // 🔹 Agrupar casos
+  // Agrupar casos
   const columnas = {
     NEW: casos.filter((c) => {
       const estado = normalizarEstado(c.estado);
@@ -92,7 +92,7 @@ export default function CasosPage() {
 
   return (
     <div className="p-6">
-      {/* Encabezado */}
+    
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">📋 Casos de Prueba - Proyecto {id}</h2>
         <Link
@@ -103,7 +103,7 @@ export default function CasosPage() {
         </Link>
       </div>
 
-      {/* Tablero estilo Kanban con Drag & Drop */}
+      {/* Tablero */}
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="grid grid-cols-4 gap-4">
           {Object.entries(columnas).map(([col, items]) => (
@@ -136,7 +136,7 @@ export default function CasosPage() {
                             className="bg-white p-3 rounded shadow hover:shadow-lg transition cursor-pointer"
                             onClick={() =>
                               navigate(`/proyectos/${id}/casos/${c.id}`)
-                            } // 👈 toda la card clickeable
+                            } 
                           >
                             <p className="font-semibold text-sm">
                               📝 {c.descripcion}

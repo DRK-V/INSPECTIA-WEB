@@ -21,7 +21,6 @@ export default function App() {
 
         {/* Contenido dinámico */}
         <main className="flex-grow pt-16"> 
-          {/* pt-16 da espacio para el navbar fijo */}
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
