@@ -9,7 +9,7 @@ function Landing() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Navbar />
+    
       {/* Header */}
    
 
@@ -312,7 +312,7 @@ function Landing() {
         </div>
       </section>
 
-      <Footer />
+     
     </div>
   );
 }

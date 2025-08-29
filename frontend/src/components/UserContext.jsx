@@ -1,31 +1,32 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const UserContext = createContext();
 
-export function UserProvider({ children }) {
+export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // Usuarios simulados
-  const usuarios = [
-    { username: 'cliente', rol: 'cliente', nombre: 'Cliente QA' },
-    { username: 'manager', rol: 'manager', nombre: 'QA Manager' },
-    { username: 'tester', rol: 'tester', nombre: 'QA Tester' }
-  ];
+  useEffect(() => {
+    const storedUser = localStorage.getItem("usuario");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
-  const login = (username) => {
-    const u = usuarios.find(u => u.username === username);
-    setUser(u || null);
+  const login = (userData) => {
+    setUser(userData);
+    localStorage.setItem("usuario", JSON.stringify(userData));
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("usuario");
+  };
 
   return (
-    <UserContext.Provider value={{ user, login, logout, usuarios }}>
+    <UserContext.Provider value={{ user, login, logout }}>
       {children}
     </UserContext.Provider>
   );
-}
+};
 
-export function useUser() {
-  return useContext(UserContext);
-}
+export const useUser = () => useContext(UserContext);

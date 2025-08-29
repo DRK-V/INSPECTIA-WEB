@@ -10,9 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.7",
+    "@hello-pangea/dnd": "^18.0.1",
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/cli": "^4.1.12",
     "@tailwindcss/vite": "^4.1.12",
+    "axios": "^1.11.0",
     "framer-motion": "^12.23.12",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.542.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
