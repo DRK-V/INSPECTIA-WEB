@@ -4,6 +4,7 @@ const userRoutes = require('./routes/dataroutes');
 const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
+const path = require("path"); 
 require('dotenv').config();
 
 const app = express();
@@ -35,6 +36,9 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use('/api/users', userRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// 👉 Servir archivos estáticos
+app.use("/documents", express.static(path.join(__dirname, "documents")));
 
 // Iniciar el servidor
 app.listen(PORT, () => {

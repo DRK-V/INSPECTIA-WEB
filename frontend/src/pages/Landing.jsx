@@ -9,11 +9,8 @@ function Landing() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <Navbar />
-      {/* Header */}
+    
    
-
-      {/* Hero Section */}
       <section className="bg-gray-100 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
@@ -35,7 +32,6 @@ function Landing() {
         </div>
       </section>
 
-      {/* Servicios Section */}
       <section id="servicios" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -48,12 +44,12 @@ function Landing() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {/* Card 1 */}
+          
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
-                {/* Icono IA */}
+         
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  {/* Puedes reemplazar por un ícono adecuado */}
+               
                   <svg width="32" height="32" fill="none"><rect width="32" height="32" rx="8" fill="#A78BFA"/><path d="M16 10v12M10 16h12" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
                 </span>
               </div>
@@ -67,11 +63,11 @@ function Landing() {
                 Solicitar Servicio
               </button>
             </div>
-            {/* Card 2 */}
+
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  {/* Icono Manual */}
+                
                   <svg width="32" height="32" fill="none"><rect width="32" height="32" rx="8" fill="#A78BFA"/><path d="M10 22V10h12v12H10z" stroke="#fff" strokeWidth="2" strokeLinejoin="round"/></svg>
                 </span>
               </div>
@@ -85,11 +81,11 @@ function Landing() {
                 Solicitar Servicio
               </button>
             </div>
-            {/* Card 3 */}
+  
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  {/* Icono Métricas */}
+                
                   <svg width="32" height="32" fill="none"><rect width="32" height="32" rx="8" fill="#A78BFA"/><path d="M10 22v-6m4 6v-10m4 10v-4" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
                 </span>
               </div>
@@ -103,11 +99,11 @@ function Landing() {
                 Solicitar Servicio
               </button>
             </div>
-            {/* Card 4 */}
+         
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  {/* Icono Equipos */}
+             
                   <svg width="32" height="32" fill="none"><rect width="32" height="32" rx="8" fill="#A78BFA"/><path d="M16 14a2 2 0 100-4 2 2 0 000 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" stroke="#fff" strokeWidth="2"/></svg>
                 </span>
               </div>
@@ -121,11 +117,11 @@ function Landing() {
                 Solicitar Servicio
               </button>
             </div>
-            {/* Card 5 */}
+    
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  {/* Icono Performance */}
+                
                   <svg width="32" height="32" fill="none"><rect width="32" height="32" rx="8" fill="#A78BFA"/><path d="M16 10v6l4 2" stroke="#fff" strokeWidth="2" strokeLinecap="round"/></svg>
                 </span>
               </div>
@@ -139,11 +135,11 @@ function Landing() {
                 Solicitar Servicio
               </button>
             </div>
-            {/* Card 6 */}
+     
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  {/* Icono Seguridad */}
+                 
                   <svg width="32" height="32" fill="none"><rect width="32" height="32" rx="8" fill="#A78BFA"/><path d="M16 10l6 2v4c0 4.418-3.582 8-8 8s-8-3.582-8-8v-4l6-2z" stroke="#fff" strokeWidth="2"/></svg>
                 </span>
               </div>
@@ -201,7 +197,7 @@ function Landing() {
         </div>
       </section>
 
-      {/* Tipos de Pruebas Section */}
+  
       <section id="tipos" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -213,14 +209,14 @@ function Landing() {
             </p>
           </div>
 
-          {/* Tarjetas animadas de tipos de pruebas */}
+      
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
                 titulo: "Pruebas Funcionales",
                 desc: "Verificación de que el software cumple con los requisitos funcionales especificados.",
                 icon: (
-                  // Icono de lista/checklist
+              
                   <svg width="28" height="28" fill="none"><rect width="28" height="28" rx="14" fill="#A78BFA"/><path d="M10 10h8M10 14h8M10 18h5" stroke="#fff" strokeWidth="2" strokeLinecap="round"/><circle cx="8" cy="10" r="1" fill="#fff"/><circle cx="8" cy="14" r="1" fill="#fff"/><circle cx="8" cy="18" r="1" fill="#fff"/></svg>
                 )
               },
@@ -228,7 +224,7 @@ function Landing() {
                 titulo: "Pruebas de Integración",
                 desc: "Testing de la comunicación entre diferentes módulos y sistemas.",
                 icon: (
-                  // Icono de enlace/conexión
+               
                   <svg width="28" height="28" fill="none"><rect width="28" height="28" rx="14" fill="#A78BFA"/><path d="M10 18l8-8M10 10h8v8" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 )
               },
@@ -236,7 +232,7 @@ function Landing() {
                 titulo: "Pruebas de Usabilidad",
                 desc: "Evaluación de la experiencia del usuario y facilidad de uso.",
                 icon: (
-                  // Icono de usuario
+             
                   <svg width="28" height="28" fill="none"><rect width="28" height="28" rx="14" fill="#A78BFA"/><circle cx="14" cy="12" r="3" fill="#fff"/><path d="M8 20c0-2.21 2.91-4 6-4s6 1.79 6 4" stroke="#fff" strokeWidth="2"/></svg>
                 )
               },
@@ -244,7 +240,7 @@ function Landing() {
                 titulo: "Pruebas de Compatibilidad",
                 desc: "Testing en diferentes navegadores, dispositivos y sistemas operativos.",
                 icon: (
-                  // Icono de dispositivos
+                  
                   <svg width="28" height="28" fill="none"><rect width="28" height="28" rx="14" fill="#A78BFA"/><rect x="8" y="10" width="8" height="6" rx="2" fill="#fff"/><rect x="12" y="17" width="4" height="2" rx="1" fill="#fff"/></svg>
                 )
               },
@@ -252,7 +248,7 @@ function Landing() {
                 titulo: "Pruebas de Regresión",
                 desc: "Verificación de que los cambios no afecten funcionalidades existentes.",
                 icon: (
-                  // Icono de flecha circular
+              
                   <svg width="28" height="28" fill="none"><rect width="28" height="28" rx="14" fill="#A78BFA"/><path d="M18 10a6 6 0 1 0 2 6h-2m0-6v2h2" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 )
               },
@@ -260,7 +256,7 @@ function Landing() {
                 titulo: "Pruebas de API",
                 desc: "Testing de interfaces de programación de aplicaciones y servicios web.",
                 icon: (
-                  // Icono de nube/API
+              
                   <svg width="28" height="28" fill="none"><rect width="28" height="28" rx="14" fill="#A78BFA"/><path d="M10 18h8a3 3 0 0 0 0-6 4 4 0 0 0-8 0 3 3 0 0 0 0 6z" stroke="#fff" strokeWidth="2"/></svg>
                 )
               },
@@ -268,7 +264,7 @@ function Landing() {
                 titulo: "Pruebas de Accesibilidad",
                 desc: "Verificación del cumplimiento de estándares de accesibilidad web.",
                 icon: (
-                  // Icono de ojo/accesibilidad
+               
                   <svg width="28" height="28" fill="none"><rect width="28" height="28" rx="14" fill="#A78BFA"/><ellipse cx="14" cy="14" rx="6" ry="4" stroke="#fff" strokeWidth="2"/><circle cx="14" cy="14" r="1.5" fill="#fff"/></svg>
                 )
               },
@@ -276,7 +272,7 @@ function Landing() {
                 titulo: "Pruebas Automatizadas",
                 desc: "Scripts automatizados para testing continuo y eficiente.",
                 icon: (
-                  // Icono de robot/automatización
+                
                   <svg width="28" height="28" fill="none"><rect width="28" height="28" rx="14" fill="#A78BFA"/><rect x="10" y="12" width="8" height="6" rx="2" fill="#fff"/><circle cx="12" cy="15" r="1" fill="#A78BFA"/><circle cx="16" cy="15" r="1" fill="#A78BFA"/><rect x="13" y="10" width="2" height="2" rx="1" fill="#fff"/></svg>
                 )
               }
@@ -298,7 +294,7 @@ function Landing() {
               </div>
             ))}
           </div>
-          {/* Animación fade-in */}
+          
           <style>
             {`
               @keyframes fade-in {
@@ -312,7 +308,7 @@ function Landing() {
         </div>
       </section>
 
-      <Footer />
+     
     </div>
   );
 }
