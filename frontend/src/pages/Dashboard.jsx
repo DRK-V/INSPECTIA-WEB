@@ -3,16 +3,20 @@ import { useUser } from "../components/UserContext";
 import { useNavigate } from "react-router-dom";
 import NuevoProyectoModal from "../components/NuevoProyectoModal";
 import Cookies from "js-cookie"; // 👈 Importamos cookies
-
+const BACKEND_URL = "https://inspectia-web.onrender.com";
 function Dashboard() {
   const { user } = useUser();
   const [proyectos, setProyectos] = useState([]);
+  const [proyectosOrden, setProyectosOrden] = useState([]); // <--- Nuevo estado para el orden
   const [casos, setCasos] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [asignarModal, setAsignarModal] = useState(false);
   const [selectedProyecto, setSelectedProyecto] = useState(null);
   const [selectedUsuarios, setSelectedUsuarios] = useState([]);
+  const [successPopup, setSuccessPopup] = useState(false); // Nuevo estado para el popup
+  const [popupMsg, setPopupMsg] = useState(""); // Mensaje dinámico para el popup
+  const [loadingGenerar, setLoadingGenerar] = useState(false); // Estado de loading para generación de casos
   const navigate = useNavigate();
 
   //  Cargar proyectos
@@ -23,8 +27,8 @@ function Dashboard() {
       try {
         const url =
           user.rol === "cliente"
-            ? `http://localhost:3000/api/users/proyectos/${user.id}`
-            : `http://localhost:3000/api/users/proyectos`;
+            ? `${BACKEND_URL}/proyectos/${user.id}`
+            : `${BACKEND_URL}/proyectos`;
 
         console.log("👉 Fetching proyectos desde:", url);
         const res = await fetch(url);
@@ -37,7 +41,7 @@ function Dashboard() {
             data.map(async (p) => {
               try {
                 const resp = await fetch(
-                  `http://localhost:3000/api/users/proyectos/${p.id}/validar-casos`
+                  `${BACKEND_URL}/${p.id}/validar-casos`
                 );
                 const result = await resp.json();
                 return { ...p, tieneCasos: result.tieneCasos };
@@ -71,6 +75,30 @@ function Dashboard() {
           });
         }
 
+        // Si es cliente, obtener el total de casos por proyecto
+        if (user.rol === "cliente") {
+          data = await Promise.all(
+            data.map(async (p) => {
+              try {
+                const resCasos = await fetch(
+                  `${BACKEND_URL}/proyectos/${p.id}/casos`
+                );
+                const casos = await resCasos.json();
+                return { ...p, total_casos: Array.isArray(casos) ? casos.length : 0 };
+              } catch (err) {
+                return { ...p, total_casos: 0 };
+              }
+            })
+          );
+          // Ordenar por id ascendente
+          data = data.sort((a, b) => a.id - b.id);
+        }
+
+        // Guardar el orden por id ascendente
+        if (user.rol === "cliente" && Array.isArray(data)) {
+          setProyectosOrden(data.map((p) => p.id));
+        }
+
         setProyectos(data);
       } catch (err) {
         console.error("❌ Error cargando proyectos:", err);
@@ -78,11 +106,23 @@ function Dashboard() {
     };
 
     fetchProyectos();
+ 
   }, [user]);
 
   //  Crear nuevo proyecto
   const handleProyectoCreado = (nuevoProyecto) => {
-    setProyectos((prev) => [...prev, nuevoProyecto]);
+    setProyectos((prev) => {
+      // Insertar y ordenar por id ascendente
+      const nuevos = [...prev, nuevoProyecto];
+      return nuevos.sort((a, b) => a.id - b.id);
+    });
+    setProyectosOrden((prev) => {
+      const nuevos = [...prev, nuevoProyecto.id];
+      return nuevos.sort((a, b) => a - b);
+    });
+    setPopupMsg("¡Proyecto creado exitosamente!");
+    setSuccessPopup(true);
+    setTimeout(() => setSuccessPopup(false), 3000);
   };
 
   //  Ver casos (para manager/tester)
@@ -92,7 +132,7 @@ function Dashboard() {
       Cookies.set("proyectoId", proyectoId);
 
       const res = await fetch(
-        `http://localhost:3000/api/users/proyectos/${proyectoId}/casos`
+        `${BACKEND_URL}/proyectos/${proyectoId}/casos`
       );
       const data = await res.json();
       setCasos(data);
@@ -112,23 +152,32 @@ function Dashboard() {
     if (archivo) formData.append("archivo", archivo);
 
     try {
-      const res = await fetch(`http://localhost:3000/api/users/evidencias`, {
+      const res = await fetch(`${BACKEND_URL}/evidencias`, {
         method: "POST",
         body: formData,
       });
       const data = await res.json();
       if (res.ok) {
-        alert("Evidencia subida ✅");
+        // alert("Evidencia subida ✅");
+        setPopupMsg("¡Evidencia subida exitosamente!");
+        setSuccessPopup(true);
+        setTimeout(() => setSuccessPopup(false), 3000);
         setCasos((prev) =>
           prev.map((c) =>
             c.id === casoId ? { ...c, estado, evidencia: data.archivo } : c
           )
         );
       } else {
-        alert("Error: " + data.message);
+        // alert("Error: " + data.message);
+        setPopupMsg("Error: " + data.message);
+        setSuccessPopup(true);
+        setTimeout(() => setSuccessPopup(false), 3000);
       }
     } catch (err) {
       console.error("Error subiendo evidencia:", err);
+      setPopupMsg("Error subiendo evidencia");
+      setSuccessPopup(true);
+      setTimeout(() => setSuccessPopup(false), 3000);
     }
   };
 
@@ -136,7 +185,7 @@ function Dashboard() {
   const abrirAsignarModal = async (proyecto) => {
     setSelectedProyecto(proyecto);
     try {
-      const res = await fetch("http://localhost:3000/api/users/users");
+      const res = await fetch(`${BACKEND_URL}/users`);
       const data = await res.json();
       setUsuarios(data);
     } catch (err) {
@@ -154,7 +203,7 @@ function Dashboard() {
   const asignarUsuarios = async () => {
     try {
       for (let usuarioId of selectedUsuarios) {
-        await fetch("http://localhost:3000/api/users/asignarProyecto", {
+        await fetch(`${BACKEND_URL}/asignarProyecto`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -164,13 +213,18 @@ function Dashboard() {
         });
       }
 
-      alert("✅ Usuarios asignados correctamente");
       setAsignarModal(false);
       setSelectedUsuarios([]);
       setSelectedProyecto(null);
+      setPopupMsg("¡Usuarios asignados exitosamente!");
+      setSuccessPopup(true);
+      setTimeout(() => setSuccessPopup(false), 3000);
     } catch (err) {
       console.error("Error asignando usuarios:", err);
-      alert("❌ Error asignando usuarios");
+      // alert("❌ Error asignando usuarios");
+      setPopupMsg("❌ Error asignando usuarios");
+      setSuccessPopup(true);
+      setTimeout(() => setSuccessPopup(false), 3000);
     }
   };
 
@@ -185,7 +239,25 @@ function Dashboard() {
 
   return (
     <div className="max-w-6xl mx-auto py-10 px-4">
-      <h1 className="text-3xl font-bold mb-6">Bienvenido, {user.nombre}</h1>
+      {/* Popup de éxito al crear proyecto, asignar usuarios o generar casos */}
+      {successPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-green-100 border border-green-400 text-green-800 px-6 py-4 rounded shadow-lg flex flex-col items-center">
+            <span className="font-semibold mb-2">{popupMsg}</span>
+          </div>
+        </div>
+      )}
+      {/* Loading para generación de casos */}
+      {loadingGenerar && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-white px-8 py-6 rounded shadow-lg flex flex-col items-center border border-purple-200 pointer-events-auto">
+            <span className="mb-2 font-semibold text-lg">Generando casos...</span>
+            <div className="loader border-4 border-purple-200 border-t-purple-600 rounded-full w-8 h-8 animate-spin"></div>
+          </div>
+        </div>
+      )}
+
+      <h1 className="text-3xl font-bold mb-6">Bienvenido, {user.nombre} {user.apellido}</h1>
 
       {/* ----------------- CLIENTE ----------------- */}
       {user.rol === "cliente" && (
@@ -204,50 +276,53 @@ function Dashboard() {
             <p>No tienes proyectos registrados.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {proyectos.map((p) => (
-                <div
-                  key={p.id}
-                  className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500"
-                >
-                  <div className="flex justify-between items-center mb-2">
-                    <h2 className="text-lg font-bold">{p.nombre_proyecto}</h2>
-                    <span className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">
-                      {p.estado || "En Progreso"}
-                    </span>
-                  </div>
-                  <p className="text-gray-600">{p.descripcion}</p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Iniciado:{" "}
-                    {p.fecha_inicio
-                      ? new Date(p.fecha_inicio).toLocaleDateString("es-ES", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })
-                      : "Pendiente"}
-                    {" • "}
-                    {p.total_casos || 0} casos generados
-                  </p>
+              {proyectosOrden
+                .map((id) => proyectos.find((p) => p.id === id))
+                .filter(Boolean)
+                .map((p) => (
+                  <div
+                    key={p.id}
+                    className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <h2 className="text-lg font-bold">{p.nombre_proyecto}</h2>
+                      <span className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">
+                        {p.estado || "En Progreso"}
+                      </span>
+                    </div>
+                    <p className="text-gray-600">{p.descripcion}</p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      creado:{" "}
+                      {p.fecha_creacion
+                        ? new Date(p.fecha_creacion).toLocaleDateString("es-ES", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })
+                        : "Pendiente"}
+                      {" • "}
+                      {p.total_casos || 0} casos generados
+                    </p>
 
-                  <div className="mt-4 flex gap-3">
-                    <button
-                      onClick={() => verCasos(p.id)} // 👈 ahora guarda en cookies
-                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-                    >
-                      Ver Detalles
-                    </button>
-
-                    {p.archivo_hu && (
-                      <a
-                        href={`http://localhost:3000/api/users/proyectos/${p.id}/hu`}
-                        className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
+                    <div className="mt-4 flex gap-3">
+                      <button
+                        onClick={() => verCasos(p.id)} // 👈 ahora guarda en cookies
+                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
                       >
-                        Descargar HU
-                      </a>
-                    )}
+                        Ver Detalles
+                      </button>
+
+                      {p.archivo_hu && (
+                        <a
+                          href={`${BACKEND_URL}/proyectos/${p.id}/hu`}
+                          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
+                        >
+                          Descargar HU
+                        </a>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           )}
 
@@ -275,95 +350,117 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {proyectos.map((p) => (
-                <tr key={p.id} className="border-t hover:bg-gray-50 transition">
-                  <td className="py-3 px-4 font-medium">{p.nombre_proyecto}</td>
-                  <td className="py-3 px-4">
-                    {p.usuarios?.nombre || "Desconocido"}
-                  </td>
-                  <td className="py-3 px-4">
-                    {p.archivo_hu ? (
-                      <a
-                        href={`http://localhost:3000/api/users/proyectos/${p.id}/hu`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-purple-600 hover:underline"
-                      >
-                        Descargar HU
-                      </a>
-                    ) : (
-                      <span className="text-gray-400">Sin archivo</span>
-                    )}
-                  </td>
-                  <td className="py-3 px-4 flex gap-3">
-                    <button
-                      onClick={() => verCasos(p.id)} // 👈 guarda en cookies
-                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
-                    >
-                      Ver Casos
-                    </button>
-                    {!p.tieneCasos && (
+              {/* Ordenar por id ascendente antes de mapear */}
+              {[...proyectos]
+                .sort((a, b) => a.id - b.id)
+                .map((p) => (
+                  <tr key={p.id} className="border-t hover:bg-gray-50 transition">
+                    <td className="py-3 px-4 font-medium">{p.nombre_proyecto}</td>
+                    <td className="py-3 px-4">
+                      {p.usuarios?.nombre || "Desconocido"}
+                    </td>
+                    <td className="py-3 px-4">
+                      {p.archivo_hu ? (
+                        <a
+                          href={`${BACKEND_URL}/proyectos/${p.id}/hu`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-600 hover:underline"
+                        >
+                          Descargar HU
+                        </a>
+                      ) : (
+                        <span className="text-gray-400">Sin archivo</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 flex gap-3">
                       <button
-                        onClick={async () => {
-                          try {
-                            const validarRes = await fetch(
-                              `http://localhost:3000/api/users/proyectos/${p.id}/validar-casos`
-                            );
-                            const validarData = await validarRes.json();
-
-                            if (validarData.existe) {
-                              alert(
-                                `⚠️ ${validarData.message} (Cantidad: ${validarData.cantidad})`
-                              );
-                              return;
-                            }
-
-                            const res = await fetch(
-                              `http://localhost:3000/api/users/proyectos/${p.id}/generar-casos`,
-                              {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ proyectoId: p.id }),
-                              }
-                            );
-                            const data = await res.json();
-
-                            if (res.ok) {
-                              alert("✅ Casos generados correctamente");
-                              verCasos(p.id);
-                              setProyectos((prev) =>
-                                prev.map((proj) =>
-                                  proj.id === p.id
-                                    ? { ...proj, tieneCasos: true }
-                                    : proj
-                                )
-                              );
-                            } else {
-                              alert(
-                                "⚠️ Error: " +
-                                  (data.message || "Ocurrió un error")
-                              );
-                            }
-                          } catch (err) {
-                            console.error("Error en generación de casos:", err);
-                            alert("❌ Error en la conexión con el servidor");
-                          }
-                        }}
-                        className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+                        onClick={() => verCasos(p.id)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
                       >
-                        Generar Casos
+                        Ver Casos
                       </button>
-                    )}
+                      {!p.tieneCasos && (
+                        <button
+                          onClick={async () => {
+                            // if (p.tieneCasos) {
+                            //   alert("⚠️ Este proyecto ya cuenta con casos generados.");
+                            //   return;
+                            // }
+                            try {
+                              setLoadingGenerar(true);
+                              const validarRes = await fetch(
+                                `${BACKEND_URL}/${p.id}/validar-casos`
+                              );
+                              const validarData = await validarRes.json();
 
-                    <button
-                      onClick={() => abrirAsignarModal(p)}
-                      className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm"
-                    >
-                      Asignar Proyecto
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                              if (validarData.existe) {
+                                setLoadingGenerar(false);
+                                // alert(
+                                //   `⚠️ ${validarData.message} (Cantidad: ${validarData.cantidad})`
+                                // );
+                                setPopupMsg(`⚠️ ${validarData.message} (Cantidad: ${validarData.cantidad})`);
+                                setSuccessPopup(true);
+                                setTimeout(() => setSuccessPopup(false), 3000);
+                                return;
+                              }
+
+                              const res = await fetch(
+                                `${BACKEND_URL}/proyectos/${p.id}/generar-casos`,
+                                {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ proyectoId: p.id }),
+                                }
+                              );
+                              const data = await res.json();
+
+                              setLoadingGenerar(false);
+                              if (res.ok) {
+                                setPopupMsg("¡Casos generados exitosamente!");
+                                setSuccessPopup(true);
+                                setTimeout(() => setSuccessPopup(false), 3000);
+                                verCasos(p.id);
+                                setProyectos((prev) =>
+                                  prev.map((proj) =>
+                                    proj.id === p.id
+                                      ? { ...proj, tieneCasos: true }
+                                      : proj
+                                  )
+                                );
+                              } else {
+                                // alert(
+                                //   "⚠️ Error: " +
+                                //     (data.message || "Ocurrió un error")
+                                // );
+                                setPopupMsg("⚠️ Error: " + (data.message || "Ocurrió un error"));
+                                setSuccessPopup(true);
+                                setTimeout(() => setSuccessPopup(false), 3000);
+                              }
+                            } catch (err) {
+                              setLoadingGenerar(false);
+                              console.error("Error en generación de casos:", err);
+                              // alert("❌ Error en la conexión con el servidor");
+                              setPopupMsg("❌ Error en la conexión con el servidor");
+                              setSuccessPopup(true);
+                              setTimeout(() => setSuccessPopup(false), 3000);
+                            }
+                          }}
+                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
+                        >
+                          Generar Casos
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => abrirAsignarModal(p)}
+                        className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Asignar Proyecto
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
@@ -434,7 +531,7 @@ function Dashboard() {
                         onChange={() => toggleUsuario(u.id)}
                       />
                       <span>
-                        {u.nombre} ({u.rol})
+                        {u.nombre} {u.apellido} 
                       </span>
                     </label>
                   ))
@@ -462,5 +559,6 @@ function Dashboard() {
     </div>
   );
 }
+
 
 export default Dashboard;

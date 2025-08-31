@@ -13,7 +13,7 @@ const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini
 
 // Registro de usuario
 const registerUser = async (req, res) => {
-  const { email, password, nombre, apellido, telefono, empresa } = req.body;
+  const { email, password, nombre, apellido, telefono, empresa, rol } = req.body;
 
   if (!email || !password || !nombre || !apellido) {
     return res.status(400).json({
@@ -23,6 +23,17 @@ const registerUser = async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Normalizar el rol a minúsculas
+    let userRole = rol && rol.trim() !== "" ? rol.trim().toLowerCase() : "cliente";
+
+    // Validar roles permitidos
+    const validRoles = ["cliente", "tester", "master"];
+    if (!validRoles.includes(userRole)) {
+      return res.status(400).json({
+        message: `Rol inválido. Los roles permitidos son: ${validRoles.join(", ")}.`,
+      });
+    }
 
     const { data, error } = await supabase
       .from("usuarios")
@@ -34,22 +45,25 @@ const registerUser = async (req, res) => {
           apellido,
           telefono,
           empresa,
-          rol: "cliente",
+          rol: userRole, // ya está en minúsculas
         },
       ])
       .select();
 
     if (error) return res.status(400).json({ message: error.message });
 
-    res
-      .status(201)
-      .json({ message: "Usuario registrado exitosamente.", user: data[0] });
+    res.status(201).json({
+      message: "Usuario registrado exitosamente.",
+      user: data[0],
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error interno del servidor.", error: error.message });
+    res.status(500).json({
+      message: "Error interno del servidor.",
+      error: error.message,
+    });
   }
 };
+
 
 // Login
 const loginUser = async (req, res) => {
@@ -113,6 +127,77 @@ const getUserById = async (req, res) => {
     res.status(500).json({ message: "Error al obtener usuario." });
   }
 };
+// Obtener todos los usuarios
+const getUsers = async (req, res) => {
+  try {
+    const { data, error } = await supabase.from("usuarios").select("*");
+
+    if (error) return res.status(500).json({ message: error.message });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Error al obtener usuarios." });
+  }
+};
+
+const actualizarEstadoProyecto = async (req, res) => {
+  const proyectoId = req.params.id;
+  console.log("🔍 Entrando a actualizarEstadoProyecto con proyectoId:", proyectoId);
+
+  try {
+    // 1. Traer todos los casos de prueba del proyecto
+    const { data: casos, error: errorCasos } = await supabase
+      .from("casos_prueba")
+      .select("estado")
+      .eq("proyecto_id", proyectoId);
+
+    if (errorCasos) {
+      console.error("❌ Error al consultar casos:", errorCasos.message);
+      return res.status(400).json({ error: errorCasos.message });
+    }
+
+    console.log("📂 Casos encontrados:", casos);
+
+    let nuevoEstado = "pendiente";
+
+    if (!casos || casos.length === 0) {
+      nuevoEstado = "pendiente"; // no hay casos
+    } else {
+      const estados = casos.map(c => c.estado);
+      console.log("📊 Estados de los casos:", estados);
+
+      if (estados.every(e => e === "finalizado")) {
+        nuevoEstado = "finalizado";
+      } else if (new Set(estados).size > 1 || estados.includes("proceso")) {
+        nuevoEstado = "proceso";
+      } else {
+        nuevoEstado = estados[0];
+      }
+    }
+
+    console.log("✅ Nuevo estado calculado:", nuevoEstado);
+
+    // 2. Actualizar el proyecto en Supabase
+    const { data: proyecto, error: errorUpdate } = await supabase
+      .from("proyectos")
+      .update({ estado: nuevoEstado })
+      .eq("id", proyectoId)
+      .select();
+
+    if (errorUpdate) {
+      console.error("❌ Error al actualizar proyecto:", errorUpdate.message);
+      return res.status(400).json({ error: errorUpdate.message });
+    }
+
+    console.log("📝 Proyecto actualizado:", proyecto);
+
+    res.json({ success: true, nuevoEstado });
+  } catch (error) {
+    console.error("🔥 Error en actualizarEstadoProyecto:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 
 // Crear proyecto con archivo HU
 
@@ -400,24 +485,30 @@ const validarCasosProyecto = async (req, res) => {
   console.log("🔍 Validando casos de uso para el proyecto:", proyecto_id);
 
   try {
+    // Consulta a supabase
     const { data, error } = await supabase
       .from("casos_prueba")
-      .select("id")
+      .select("id, estado") // le añadí estado para debug
       .eq("proyecto_id", proyecto_id);
 
-    console.log("📤 Respuesta de Supabase:", { data, error });
+    console.log("📤 Respuesta de Supabase:");
+    console.log("   ➡️ data:", data);
+    console.log("   ➡️ error:", error);
 
+    // Manejo de error de supabase
     if (error) {
       console.error("❌ Error en la consulta Supabase:", error.message);
       return res.status(400).json({ message: error.message });
     }
 
-    if (data.length > 0) {
+    // Validación si existen casos
+    if (data && data.length > 0) {
       console.log(`✅ El proyecto ${proyecto_id} tiene ${data.length} casos.`);
       return res.json({
         existe: true,
         cantidad: data.length,
         message: `El proyecto ${proyecto_id} ya tiene casos de uso.`,
+        casos: data, // lo devuelvo para debug
       });
     } else {
       console.log(`⚠️ El proyecto ${proyecto_id} no tiene casos.`);
@@ -435,7 +526,6 @@ const validarCasosProyecto = async (req, res) => {
     });
   }
 };
-
 const generarCasosPrueba = async (req, res) => {
   try {
     const { proyecto_id } = req.params;
@@ -484,21 +574,26 @@ const generarCasosPrueba = async (req, res) => {
       return res.status(400).json({ message: "El archivo HU está vacío" });
     }
 
-    // 3. Prompt para Gemini
+    // 3. Improved Prompt for Gemini
     const prompt = `
 Tengo estas Historias de Usuario (HU) de un proyecto de software: 
 ${JSON.stringify(huData, null, 2)}
 
-Genera casos de prueba en JSON con esta estructura estricta:
+Genera casos de prueba en JSON válido con esta estructura estricta:
 [
   {
     "descripcion": "texto",
-    "pasos": ["paso 1", "paso 2", ...],
+    "pasos": ["paso 1", "paso 2", "paso 3"],
     "resultado_esperado": "texto",
     "estado": "pendiente"
   }
 ]
-NO devuelvas explicaciones, solo el JSON válido.
+
+IMPORTANTE:
+- Devuelve SOLO el array JSON, sin explicaciones ni texto adicional
+- NO uses comas finales (trailing commas) en arrays u objetos
+- Asegúrate de que el JSON sea válido y parseable
+- No incluyas \`\`\`json ni \`\`\` en tu respuesta
 `;
 
     console.log("📝 Prompt enviado a Gemini:\n", prompt);
@@ -518,7 +613,7 @@ NO devuelvas explicaciones, solo el JSON válido.
       JSON.stringify(result, null, 2)
     );
 
-    // 5. Extraer JSON
+    // 5. Enhanced JSON extraction and cleaning
     let casosPrueba = [];
     if (
       result.candidates &&
@@ -526,41 +621,83 @@ NO devuelvas explicaciones, solo el JSON válido.
       result.candidates[0].content.parts
     ) {
       let rawText = result.candidates[0].content.parts[0].text;
-
       console.log("📜 Texto recibido de Gemini:", rawText);
 
-      rawText = rawText
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
+      // Enhanced JSON cleaning function
+      function cleanJSONString(text) {
+        return text
+          .replace(/```json/g, "")
+          .replace(/```/g, "")
+          .trim()
+          // Remove trailing commas before closing brackets/braces
+          .replace(/,\s*]/g, ']')
+          .replace(/,\s*}/g, '}')
+          // Remove any control characters that might interfere
+          .replace(/[\u0000-\u001F\u007F-\u009F]/g, '');
+      }
+
+      const cleanedText = cleanJSONString(rawText);
+      console.log("🧹 Texto limpiado:", cleanedText);
 
       try {
-        casosPrueba = JSON.parse(rawText);
+        casosPrueba = JSON.parse(cleanedText);
         console.log("✅ Casos parseados:", casosPrueba);
       } catch (err) {
         console.error("❌ Error parseando JSON:", err);
-        return res.status(500).json({
-          message: "Respuesta de Gemini no es JSON válido",
-          rawText,
-        });
+        console.error("📄 Texto que falló:", cleanedText);
+        
+        // Additional attempt: try to fix common JSON issues
+        try {
+          let fixedText = cleanedText
+            // Fix unclosed strings or arrays
+            .replace(/"\s*,\s*$/, '"')
+            // Ensure proper array/object closure
+            .replace(/,\s*$/, '');
+          
+          // If it doesn't start with [ or {, wrap in array
+          if (!fixedText.startsWith('[') && !fixedText.startsWith('{')) {
+            fixedText = '[' + fixedText + ']';
+          }
+          
+          casosPrueba = JSON.parse(fixedText);
+          console.log("✅ Casos parseados después de segundo intento:", casosPrueba);
+        } catch (secondErr) {
+          console.error("❌ Error en segundo intento:", secondErr);
+          return res.status(500).json({
+            message: "Respuesta de Gemini no es JSON válido después de limpieza",
+            rawText: cleanedText,
+            originalError: err.message,
+            secondError: secondErr.message
+          });
+        }
       }
     }
 
-    if (casosPrueba.length === 0) {
-      console.error("⚠️ Gemini no generó casos de prueba");
+    if (!Array.isArray(casosPrueba) || casosPrueba.length === 0) {
+      console.error("⚠️ Gemini no generó casos de prueba válidos");
       return res
         .status(400)
-        .json({ message: "Gemini no generó casos de prueba" });
+        .json({ message: "Gemini no generó casos de prueba válidos" });
     }
 
-    // 6. Insertar en Supabase
-    const insertData = casosPrueba.map((c) => ({
-      proyecto_id: proyecto.id,
-      descripcion: c.descripcion,
-      pasos: Array.isArray(c.pasos) ? c.pasos.join("\n") : c.pasos,
-      resultado_esperado: c.resultado_esperado,
-      estado: c.estado || "pendiente",
-    }));
+    // 6. Validate structure and insert in Supabase
+    const insertData = casosPrueba
+      .filter(caso => caso.descripcion && caso.pasos && caso.resultado_esperado)
+      .map((c) => ({
+        proyecto_id: proyecto.id,
+        descripcion: c.descripcion,
+        pasos: Array.isArray(c.pasos) ? c.pasos.join("\n") : String(c.pasos),
+        resultado_esperado: c.resultado_esperado,
+        estado: c.estado || "pendiente",
+      }));
+
+    if (insertData.length === 0) {
+      console.error("⚠️ No se encontraron casos de prueba válidos para insertar");
+      return res.status(400).json({ 
+        message: "No se encontraron casos de prueba con estructura válida",
+        receivedCases: casosPrueba 
+      });
+    }
 
     console.log("📥 Data lista para insertar:", insertData);
 
@@ -579,6 +716,8 @@ NO devuelvas explicaciones, solo el JSON válido.
     res.status(201).json({
       message: "✅ Casos de prueba generados e insertados con éxito",
       casos: inserted,
+      total_generados: casosPrueba.length,
+      total_insertados: inserted.length
     });
   } catch (err) {
     console.error("💥 Error general en generarCasosPrueba:", err);
@@ -830,7 +969,9 @@ const getEvidenciasByEjecucion = async (req, res) => {
   }
 };
 
+
 module.exports = {
+  
   registerUser,
   loginUser,
   getUserById,
@@ -847,9 +988,10 @@ module.exports = {
   validarCasosProyecto,
   getCasoById,
   getProyectoById,
-
+actualizarEstadoProyecto,
   updateCasoPruebaEstado,
   crearEjecucion,
+  getUsers,
   subirEvidencia,
   obtenerEjecucionesPorCaso,
   obtenerEvidenciasPorEjecucion,

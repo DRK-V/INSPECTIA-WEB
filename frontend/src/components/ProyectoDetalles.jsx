@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
+const BACKEND_URL = "https://inspectia-web.onrender.com";
 function ProyectoDetalles() {
   const { id } = useParams();
   const [casos, setCasos] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://localhost:3000/api/users/casos/${id}`)
+    fetch(`${BACKEND_URL}/casos/${id}`)
       .then((res) => res.json())
       .then((data) => setCasos(data))
       .catch((err) => console.error("Error cargando casos:", err));

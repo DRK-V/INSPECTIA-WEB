@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useUser } from "../components/UserContext";
-
+const BACKEND_URL = "https://inspectia-web.onrender.com";
 export default function Login() {
   const { login } = useUser();
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:3000/api/users/login", {
+      const res = await fetch(`${BACKEND_URL}/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -27,7 +27,7 @@ export default function Login() {
       const data = await res.json();
       console.log("Usuario logueado:", data.user);
 
-      login(data.user); 
+      login(data.user);
       navigate("/");
     } catch (err) {
       setError("Credenciales incorrectas");
