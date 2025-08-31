@@ -35,7 +35,7 @@ const swaggerDocs = swaggerJsdoc(swaggerOptions);
 const app = express();
 
 app.use(cors({ 
-  origin: ['https://front-clima-latest.onrender.com', 'http://localhost:5173'], 
+  origin: ['https://inspectia-web.vercel.app', 'http://localhost:5173'], 
   methods: ['GET', 'POST', 'PUT', 'DELETE'], 
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
