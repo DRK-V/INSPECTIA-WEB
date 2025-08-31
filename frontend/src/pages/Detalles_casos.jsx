@@ -27,7 +27,8 @@ export default function CasoDetalle({ rol = "tester" }) {
     const fetchCasoYProyecto = async () => {
       try {
         const res = await fetch(`${BACKEND_URL}/casos/${casoId}`);
-        if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`);
+        if (!res.ok)
+          throw new Error(`Error ${res.status}: ${await res.text()}`);
         const dataCaso = await res.json();
 
         if (typeof dataCaso.pasos === "string") {
@@ -80,32 +81,32 @@ export default function CasoDetalle({ rol = "tester" }) {
     if (!proyectoId) return;
     try {
       // Petición a proyecto
-      console.log(`Enviando petición a ${BACKEND_URL}/${proyectoId}/estado con estado:`, nuevo);
-      const res = await fetch(
-        `${BACKEND_URL}/${proyectoId}/estado`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ estado: nuevo }),
-        }
+      console.log(
+        `Enviando petición a ${BACKEND_URL}/${proyectoId}/estado con estado:`,
+        nuevo
       );
+      const res = await fetch(`${BACKEND_URL}/${proyectoId}/estado`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: nuevo }),
+      });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Error al actualizar estado");
+      if (!res.ok)
+        throw new Error(data.message || "Error al actualizar estado");
       console.log("Respuesta de /proyecto_id/estado:", data);
 
       // Petición adicional a casos/id/estado
-      const resCaso = await fetch(
-        `${BACKEND_URL}/casos/${casoId}/estado`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ estado: nuevo }),
-        }
-      );
+      const resCaso = await fetch(`${BACKEND_URL}/casos/${casoId}/estado`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: nuevo }),
+      });
       const dataCaso = await resCaso.json();
-      if (!resCaso.ok) throw new Error(dataCaso.message || "Error al actualizar estado del caso");
+      if (!resCaso.ok)
+        throw new Error(
+          dataCaso.message || "Error al actualizar estado del caso"
+        );
       console.log("Respuesta de /casos/id/estado:", dataCaso);
-
     } catch (err) {
       console.error("Error actualizando estado:", err);
       alert("Error al actualizar el estado");
@@ -211,10 +212,14 @@ export default function CasoDetalle({ rol = "tester" }) {
       <header className="sticky top-0 z-20 bg-white shadow-md border-b border-blue-200 flex items-center justify-between px-8 py-4">
         <div>
           <h2 className="text-2xl font-bold text-blue-700 flex items-center gap-2">
-            <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded mr-2">Tarea {caso.id}</span>
+            <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded mr-2">
+              Tarea {caso.id}
+            </span>
             {caso.titulo}
           </h2>
-          <p className="text-xs text-gray-500 mt-1">Generado por: {caso.generado_por || "IA"}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            Generado por: {caso.generado_por || "IA"}
+          </p>
         </div>
         <Link
           to={`/proyectos/${proyectoId}/casos`}
@@ -233,7 +238,9 @@ export default function CasoDetalle({ rol = "tester" }) {
               <span className="inline-block w-2 h-2 bg-blue-500 rounded-full"></span>
               Descripción
             </h3>
-            <p className="text-gray-700">{caso.descripcion || "Sin descripción"}</p>
+            <p className="text-gray-700">
+              {caso.descripcion || "Sin descripción"}
+            </p>
           </div>
 
           {/* Pasos */}
@@ -289,12 +296,15 @@ export default function CasoDetalle({ rol = "tester" }) {
                           <span className="text-gray-800">{c.comentarios}</span>
                         </div>
                         <span className="text-blue-600 text-xs font-semibold ml-2 group-hover:underline">
-                          {comentarioExpandido === c.id ? "▲ Ocultar" : "▼ Ver evidencias"}
+                          {comentarioExpandido === c.id
+                            ? "▲ Ocultar"
+                            : "▼ Ver evidencias"}
                         </span>
                       </div>
                       <div className="text-xs text-gray-400 mt-1 ml-11">
                         {/* Timestamp ficticio */}
-                        {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}
+                        {new Date().toLocaleDateString()}{" "}
+                        {new Date().toLocaleTimeString()}
                       </div>
                       {/* evidencias */}
                       {comentarioExpandido === c.id && (
@@ -302,7 +312,10 @@ export default function CasoDetalle({ rol = "tester" }) {
                           {evidencias[c.id] && evidencias[c.id].length > 0 ? (
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                               {evidencias[c.id].map((ev, idx) => (
-                                <div key={idx} className="border rounded-lg overflow-hidden bg-gray-50 shadow">
+                                <div
+                                  key={idx}
+                                  className="border rounded-lg overflow-hidden bg-gray-50 shadow"
+                                >
                                   <img
                                     src={`${BACKEND_URL}/${ev.archivo_url}`}
                                     alt="Evidencia"
@@ -312,7 +325,9 @@ export default function CasoDetalle({ rol = "tester" }) {
                               ))}
                             </div>
                           ) : (
-                            <p className="text-gray-500 text-sm">No hay evidencias</p>
+                            <p className="text-gray-500 text-sm">
+                              No hay evidencias
+                            </p>
                           )}
                         </div>
                       )}
@@ -320,7 +335,9 @@ export default function CasoDetalle({ rol = "tester" }) {
                   ))}
                 </ul>
               ) : (
-                <p className="text-gray-500 text-sm mb-4">No hay comentarios aún</p>
+                <p className="text-gray-500 text-sm mb-4">
+                  No hay comentarios aún
+                </p>
               )}
 
               {!mostrarFormulario && (
@@ -333,43 +350,149 @@ export default function CasoDetalle({ rol = "tester" }) {
               )}
 
               {mostrarFormulario && (
-                <div className="mt-4 space-y-3 animate-fade-in">
-                  <textarea
-                    className="w-full border rounded p-2 focus:ring-2 focus:ring-yellow-300"
-                    rows="3"
-                    placeholder="Escribe tu comentario..."
-                    value={nuevoComentario}
-                    onChange={(e) => setNuevoComentario(e.target.value)}
-                  />
+                <div className="mt-4 animate-fade-in">
+                  <div
+                    className="border-2 border-dashed border-gray-300 rounded-lg p-3 bg-white shadow-sm relative"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const files = Array.from(e.dataTransfer.files);
+                      if (files.length > 0) {
+                        setImagenes((prev) => [...prev, ...files]);
+                      }
+                    }}
+                    onPaste={(e) => {
+                      const items = Array.from(e.clipboardData.items);
+                      const files = items
+                        .filter((item) => item.kind === "file")
+                        .map((item) => item.getAsFile())
+                        .filter(Boolean);
+                      if (files.length > 0) {
+                        setImagenes((prev) => [...prev, ...files]);
+                      }
+                    }}
+                  >
+                    {/* Textarea */}
+                    <textarea
+                      className="w-full border-0 focus:ring-0 resize-none"
+                      rows="3"
+                      placeholder="Escribe un comentario, arrastra o pega imágenes/archivos aquí..."
+                      value={nuevoComentario}
+                      onChange={(e) => setNuevoComentario(e.target.value)}
+                      onKeyDown={(e) => {
+                        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                          const disabled =
+                            !nuevoComentario.trim() && imagenes.length === 0;
+                          if (!disabled) handleGuardar();
+                        }
+                      }}
+                    />
 
-                  <input
-                    type="file"
-                    accept=".jpg,.jpeg,.png,.log,.pdf"
-                    multiple
-                    onChange={handleFileChange}
-                    className="block w-full text-sm text-gray-600"
-                  />
-                  {imagenes.length > 0 && (
-                    <ul className="mb-2 text-sm text-gray-600">
-                      {Array.from(imagenes).map((file, idx) => (
-                        <li key={idx}>📂 {file.name}</li>
-                      ))}
-                    </ul>
-                  )}
+                    {/* Archivos adjuntos (preview) */}
+                    {imagenes.length > 0 && (
+                      <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {imagenes.map((file, idx) => {
+                          const isImage = file.type.startsWith("image/");
+                          const isPDF = file.type === "application/pdf";
+                          const isLOG = file.name
+                            .toLowerCase()
+                            .endsWith(".log");
 
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleGuardar}
-                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-                    >
-                      💾 Guardar
-                    </button>
-                    <button
-                      onClick={() => setMostrarFormulario(false)}
-                      className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
-                    >
-                      Cancelar
-                    </button>
+                          return (
+                            <div
+                              key={idx}
+                              className="relative border rounded-lg p-2 bg-gray-50 shadow hover:shadow-md transition"
+                            >
+                              {/* Botón eliminar */}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setImagenes(
+                                    imagenes.filter((_, i) => i !== idx)
+                                  )
+                                }
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
+                                aria-label="Eliminar archivo"
+                              >
+                                ✕
+                              </button>
+
+                              {/* Vista previa */}
+                              {isImage ? (
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={file.name}
+                                  className="w-full h-32 object-cover rounded cursor-pointer"
+                                  onClick={() =>
+                                    window.open(
+                                      URL.createObjectURL(file),
+                                      "_blank"
+                                    )
+                                  }
+                                />
+                              ) : (
+                                <div className="flex flex-col items-center justify-center h-32 text-gray-600">
+                                  {isPDF
+                                    ? "📄 PDF"
+                                    : isLOG
+                                    ? "📝 LOG"
+                                    : "📁 Archivo"}
+                                  <span className="text-xs mt-1 text-center break-words">
+                                    {file.name}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Footer con acciones */}
+                    <div className="mt-3 flex items-center justify-between">
+                      {/* Adjuntar archivo */}
+                      <label className="cursor-pointer text-blue-600 text-sm hover:underline">
+                        📎 Adjuntar archivo
+                        <input
+                          type="file"
+                          accept=".jpg,.jpeg,.png,.log,.pdf"
+                          multiple
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                      </label>
+
+                      {/* Botones */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleGuardar}
+                          disabled={
+                            !nuevoComentario.trim() && imagenes.length === 0
+                          }
+                          className={`px-4 py-2 rounded text-white transition
+              ${
+                !nuevoComentario.trim() && imagenes.length === 0
+                  ? "bg-green-600/60 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
+              }`}
+                          title="Ctrl/Cmd + Enter para guardar"
+                        >
+                          💾 Guardar
+                        </button>
+                        <button
+                          onClick={() => {
+                            setNuevoComentario(""); // limpia texto
+                            setImagenes([]); // limpia archivos
+                            setMostrarFormulario(false); // cierra formulario
+                          }}
+                          className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Hint */}
                   </div>
                 </div>
               )}
@@ -395,10 +518,12 @@ export default function CasoDetalle({ rol = "tester" }) {
                   <option value="Pendiente">Pendiente</option>
                   <option value="En Ejecución">En Ejecución</option>
                   <option value="Finalizado">Finalizado</option>
-                   <option value="Fallo">Fallo</option>
+                  <option value="Fallo">Fallo</option>
                 </select>
               ) : (
-                <span className="inline-block px-2 py-1 bg-blue-100 rounded text-blue-700">{estado}</span>
+                <span className="inline-block px-2 py-1 bg-blue-100 rounded text-blue-700">
+                  {estado}
+                </span>
               )}
             </p>
           </div>
@@ -442,8 +567,8 @@ export default function CasoDetalle({ rol = "tester" }) {
               Trabajo
             </h3>
             <p>
-              <span className="font-semibold">Parent:</span>{" "}
-              Proyecto {proyecto?.nombre_proyecto || "Cargando..."}
+              <span className="font-semibold">Parent:</span> Proyecto{" "}
+              {proyecto?.nombre_proyecto || "Cargando..."}
             </p>
           </div>
         </aside>
