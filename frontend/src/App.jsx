@@ -10,7 +10,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import ProyectoDetalles from "./components/ProyectoDetalles";
 import CasosPage from "./pages/CasosPage";
 import CasoDetalle from "./pages/Detalles_casos.jsx";
-
+import Usuarios from "./pages/Usuarios.jsx";
 
 export default function App() {
   return (
@@ -29,6 +29,7 @@ export default function App() {
             <Route path="/proyecto/:id" element={<ProyectoDetalles />} />
              <Route path="/proyectos/:id/casos" element={<CasosPage />} />
              <Route path="/proyectos/:id/casos/:casoId" element={<CasoDetalle />} />
+             <Route path="/usuarios" element={<Usuarios />} />
           </Routes>
         </main>
 

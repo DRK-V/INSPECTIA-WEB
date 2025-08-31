@@ -9,10 +9,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   const handleNavClick = (sectionId) => {
-    // Ir al home primero
     navigate("/");
-
-    // Dar un pequeño delay para que cargue el home y luego haga scroll
     setTimeout(() => {
       const section = document.getElementById(sectionId);
       if (section) {
@@ -35,7 +32,7 @@ export default function Navbar() {
             </span>
           </div>
 
-          {/* Menú de navegación */}
+          {/* Menú principal */}
           <nav className="hidden md:flex space-x-8">
             <button
               onClick={() => handleNavClick("servicios")}
@@ -63,7 +60,7 @@ export default function Navbar() {
             </button>
           </nav>
 
-        
+          {/* Usuario */}
           <div className="flex gap-4 items-center relative">
             {!user ? (
               <button
@@ -94,11 +91,25 @@ export default function Navbar() {
                     >
                       Gestiones
                     </button>
+
+                    {/* Solo para managers */}
+                    {user.rol === "manager" && (
+                      <button
+                        onClick={() => {
+                          navigate("/usuarios");
+                          setOpen(false);
+                        }}
+                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-100"
+                      >
+                        Usuarios
+                      </button>
+                    )}
+
                     <button
                       onClick={() => {
-                        logout(); 
+                        logout();
                         setOpen(false);
-                        navigate("/"); 
+                        navigate("/");
                       }}
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-purple-100"
                     >
