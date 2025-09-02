@@ -54,6 +54,10 @@ app.get('/api-docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.send(swaggerDocs);
 });
+// Endpoint de health check (para ping desde el front o monitor)
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", message: "Backend activo 🚀" });
+});
 
 // Levantar servidor
 app.listen(PORT, () => {
