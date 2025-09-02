@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Shield, CheckCircle, Award } from "lucide-react";
 import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
@@ -12,6 +12,20 @@ function Landing() {
 
   // Ahora isLoggedIn depende del contexto
   const isLoggedIn = !!user;
+  useEffect(() => {
+  const wakeUpBackend = async () => {
+    try {
+      await fetch("https://inspectia-web.onrender.com/health");
+      console.log("✅ Backend despierto");
+    } catch (error) {
+      console.error("⚠️ No se pudo despertar el backend:", error);
+    }
+  };
+
+  wakeUpBackend();
+}, []);
+
+
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
