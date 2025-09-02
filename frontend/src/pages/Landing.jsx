@@ -13,19 +13,17 @@ function Landing() {
   // Ahora isLoggedIn depende del contexto
   const isLoggedIn = !!user;
   useEffect(() => {
-  const wakeUpBackend = async () => {
-    try {
-      await fetch("https://inspectia-web.onrender.com/health");
-      console.log("✅ Backend despierto");
-    } catch (error) {
-      console.error("⚠️ No se pudo despertar el backend:", error);
-    }
-  };
+    const wakeUpBackend = async () => {
+      try {
+        await fetch("https://inspectia-web.onrender.com/health");
+        console.log("✅ Backend despierto");
+      } catch (error) {
+        console.error("⚠️ No se pudo despertar el backend:", error);
+      }
+    };
 
-  wakeUpBackend();
-}, []);
-
-
+    wakeUpBackend();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -71,15 +69,11 @@ function Landing() {
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  <svg width="32" height="32" fill="none">
-                    <rect width="32" height="32" rx="8" fill="#A78BFA" />
-                    <path
-                      d="M16 10v12M10 16h12"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <img
+                    src="/icon/12966881.png"
+                    alt="Testing IA"
+                    className="w-8 h-8"
+                  />
                 </span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -94,15 +88,11 @@ function Landing() {
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  <svg width="32" height="32" fill="none">
-                    <rect width="32" height="32" rx="8" fill="#A78BFA" />
-                    <path
-                      d="M10 22V10h12v12H10z"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <img
+                    src="/icon/tarea-completada.webp"
+                    alt="Testing IA"
+                    className="w-8 h-8"
+                  />
                 </span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -117,15 +107,11 @@ function Landing() {
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  <svg width="32" height="32" fill="none">
-                    <rect width="32" height="32" rx="8" fill="#A78BFA" />
-                    <path
-                      d="M10 22v-6m4 6v-10m4 10v-4"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <img
+                    src="/icon/17026992.png"
+                    alt="Testing IA"
+                    className="w-8 h-8"
+                  />
                 </span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -140,14 +126,11 @@ function Landing() {
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  <svg width="32" height="32" fill="none">
-                    <rect width="32" height="32" rx="8" fill="#A78BFA" />
-                    <path
-                      d="M16 14a2 2 0 100-4 2 2 0 000 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
-                      stroke="#fff"
-                      strokeWidth="2"
-                    />
-                  </svg>
+                  <img
+                    src="/icon/4727413.png"
+                    alt="Testing IA"
+                    className="w-8 h-8"
+                  />
                 </span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -162,15 +145,11 @@ function Landing() {
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  <svg width="32" height="32" fill="none">
-                    <rect width="32" height="32" rx="8" fill="#A78BFA" />
-                    <path
-                      d="M16 10v6l4 2"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                  </svg>
+                  <img
+                    src="/icon/7910150.png"
+                    alt="Testing IA"
+                    className="w-8 h-8"
+                  />
                 </span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -185,14 +164,11 @@ function Landing() {
             <div className="bg-gray-50 p-8 rounded-lg flex flex-col">
               <div className="mb-4">
                 <span className="inline-block bg-purple-200 p-3 rounded-lg">
-                  <svg width="32" height="32" fill="none">
-                    <rect width="32" height="32" rx="8" fill="#A78BFA" />
-                    <path
-                      d="M16 10l6 2v4c0 4.418-3.582 8-8 8s-8-3.582-8-8v-4l6-2z"
-                      stroke="#fff"
-                      strokeWidth="2"
-                    />
-                  </svg>
+                  <img
+                    src="/icon/8444080.png"
+                    alt="Testing IA"
+                    className="w-8 h-8"
+                  />
                 </span>
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
@@ -270,166 +246,62 @@ function Landing() {
               {
                 titulo: "Pruebas Funcionales",
                 desc: "Verificación de que el software cumple con los requisitos funcionales especificados.",
-                icon: (
-                  <svg width="28" height="28" fill="none">
-                    <rect width="28" height="28" rx="14" fill="#A78BFA" />
-                    <path
-                      d="M10 10h8M10 14h8M10 18h5"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    />
-                    <circle cx="8" cy="10" r="1" fill="#fff" />
-                    <circle cx="8" cy="14" r="1" fill="#fff" />
-                    <circle cx="8" cy="18" r="1" fill="#fff" />
-                  </svg>
-                ),
+                icon: "/icon/5009854.png",
               },
               {
                 titulo: "Pruebas de Integración",
                 desc: "Testing de la comunicación entre diferentes módulos y sistemas.",
-                icon: (
-                  <svg width="28" height="28" fill="none">
-                    <rect width="28" height="28" rx="14" fill="#A78BFA" />
-                    <path
-                      d="M10 18l8-8M10 10h8v8"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                ),
+                icon: "/icon/2275022.png",
               },
               {
                 titulo: "Pruebas de Usabilidad",
                 desc: "Evaluación de la experiencia del usuario y facilidad de uso.",
-                icon: (
-                  <svg width="28" height="28" fill="none">
-                    <rect width="28" height="28" rx="14" fill="#A78BFA" />
-                    <circle cx="14" cy="12" r="3" fill="#fff" />
-                    <path
-                      d="M8 20c0-2.21 2.91-4 6-4s6 1.79 6 4"
-                      stroke="#fff"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                ),
+                icon: "/icon/17023757.png",
               },
               {
                 titulo: "Pruebas de Compatibilidad",
                 desc: "Testing en diferentes navegadores, dispositivos y sistemas operativos.",
-                icon: (
-                  <svg width="28" height="28" fill="none">
-                    <rect width="28" height="28" rx="14" fill="#A78BFA" />
-                    <rect
-                      x="8"
-                      y="10"
-                      width="8"
-                      height="6"
-                      rx="2"
-                      fill="#fff"
-                    />
-                    <rect
-                      x="12"
-                      y="17"
-                      width="4"
-                      height="2"
-                      rx="1"
-                      fill="#fff"
-                    />
-                  </svg>
-                ),
+                icon: "/icon/11923457.png",
               },
               {
                 titulo: "Pruebas de Regresión",
                 desc: "Verificación de que los cambios no afecten funcionalidades existentes.",
-                icon: (
-                  <svg width="28" height="28" fill="none">
-                    <rect width="28" height="28" rx="14" fill="#A78BFA" />
-                    <path
-                      d="M18 10a6 6 0 1 0 2 6h-2m0-6v2h2"
-                      stroke="#fff"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                ),
+                icon: "/icon/3295505.png",
               },
               {
                 titulo: "Pruebas de API",
                 desc: "Testing de interfaces de programación de aplicaciones y servicios web.",
-                icon: (
-                  <svg width="28" height="28" fill="none">
-                    <rect width="28" height="28" rx="14" fill="#A78BFA" />
-                    <path
-                      d="M10 18h8a3 3 0 0 0 0-6 4 4 0 0 0-8 0 3 3 0 0 0 0 6z"
-                      stroke="#fff"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                ),
+                icon: "/icon/10169724.png",
               },
               {
                 titulo: "Pruebas de Accesibilidad",
                 desc: "Verificación del cumplimiento de estándares de accesibilidad web.",
-                icon: (
-                  <svg width="28" height="28" fill="none">
-                    <rect width="28" height="28" rx="14" fill="#A78BFA" />
-                    <ellipse
-                      cx="14"
-                      cy="14"
-                      rx="6"
-                      ry="4"
-                      stroke="#fff"
-                      strokeWidth="2"
-                    />
-                    <circle cx="14" cy="14" r="1.5" fill="#fff" />
-                  </svg>
-                ),
+                icon: "/icon/5392792.png",
               },
               {
                 titulo: "Pruebas Automatizadas",
                 desc: "Scripts automatizados para testing continuo y eficiente.",
-                icon: (
-                  <svg width="28" height="28" fill="none">
-                    <rect width="28" height="28" rx="14" fill="#A78BFA" />
-                    <rect
-                      x="10"
-                      y="12"
-                      width="8"
-                      height="6"
-                      rx="2"
-                      fill="#fff"
-                    />
-                    <circle cx="12" cy="15" r="1" fill="#A78BFA" />
-                    <circle cx="16" cy="15" r="1" fill="#A78BFA" />
-                    <rect
-                      x="13"
-                      y="10"
-                      width="2"
-                      height="2"
-                      rx="1"
-                      fill="#fff"
-                    />
-                  </svg>
-                ),
+                icon: "/icon/2031688.png",
               },
             ].map((item, idx) => (
               <div
                 key={item.titulo}
                 className={`bg-white p-6 rounded-xl shadow flex items-start gap-4 transition-all duration-300
-                  opacity-0 animate-fade-in
-                  hover:-translate-y-2 hover:shadow-lg`}
+        opacity-0 animate-fade-in
+        hover:-translate-y-2 hover:shadow-lg`}
                 style={{
                   animationDelay: `${idx * 0.1}s`,
                   animationFillMode: "forwards",
                 }}
               >
-                <span className="inline-block bg-purple-500 text-white p-3 rounded-full mt-1">
-                  {item.icon}
+                <span className="flex items-center justify-center bg-purple-200 rounded-full mt-1 w-14 h-14 shrink-0">
+                  <img
+                    src={item.icon}
+                    alt={item.titulo}
+                    className="w-7 h-7 object-contain"
+                  />
                 </span>
+
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 mb-1">
                     {item.titulo}

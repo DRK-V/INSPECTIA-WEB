@@ -533,27 +533,31 @@ export default function CasoDetalle({ rol = "tester" }) {
               <span className="inline-block w-2 h-2 bg-purple-400 rounded-full"></span>
               Datos requeridos
             </h3>
+
             {proyecto?.url_sitio && (
-              <p>
-                <span className="font-semibold">URL página:</span>{" "}
+              <p className="flex items-center gap-2">
+                <span className="font-semibold">URL página:</span>
                 <a
                   href={proyecto.url_sitio}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-blue-600 underline hover:text-blue-800"
+                  className="text-blue-600 underline hover:text-blue-800 truncate max-w-[250px]"
+                  title={proyecto.url_sitio} // Tooltip con la URL completa
                 >
                   {proyecto.url_sitio}
                 </a>
               </p>
             )}
+
             {proyecto?.url_descarga && (
-              <p>
-                <span className="font-semibold">Mockup:</span>{" "}
+              <p className="flex items-center gap-2">
+                <span className="font-semibold">Mockup:</span>
                 <a
                   href={proyecto.url_descarga}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-blue-600 underline hover:text-blue-800"
+                  className="text-blue-600 underline hover:text-blue-800 truncate max-w-[250px]"
+                  title={proyecto.url_descarga} // Tooltip con la URL completa
                 >
                   {proyecto.url_descarga}
                 </a>
