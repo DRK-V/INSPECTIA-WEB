@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { useUser } from "./UserContext";
 
 const avatarUrl = "https://cdn-icons-png.flaticon.com/512/4712/4712035.png";
-
+const BACKEND_URL = "https://inspectia-web.onrender.com";
 function Chatbot() {
   const { user } = useUser();
   const [open, setOpen] = useState(false);
@@ -33,7 +33,7 @@ function Chatbot() {
     if (state === "WAIT_PROJECT_OPTION") {
       if (option === "Sí") {
         try {
-          const res = await fetch(`http://localhost:3000/proyectos/${user.id}`);
+          const res = await fetch(`${BACKEND_URL}/proyectos/${user.id}`);
           const data = await res.json();
           setProyectos(data);
 
@@ -66,7 +66,7 @@ function Chatbot() {
     setMessages((prev) => [...prev, { from: "bot", text: "Esperando datos del proyecto..." }]);
     try {
       const res = await fetch(
-        `http://localhost:3000/proyectos/nombre/${encodeURIComponent(proyectoSeleccionado.nombre_proyecto)}`
+        `${BACKEND_URL}/proyectos/nombre/${encodeURIComponent(proyectoSeleccionado.nombre_proyecto)}`
       );
       const data = await res.json();
 
