@@ -1,8 +1,15 @@
+
 import React, { useState, useEffect } from "react";
 import { useUser } from "../components/UserContext";
 import { useNavigate } from "react-router-dom";
 import NuevoProyectoModal from "../components/NuevoProyectoModal";
 import Cookies from "js-cookie"; // 👈 Importamos cookies
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { ChevronDown, ChevronUp } from "lucide-react"; 
+import Chatbot from "../components/Chatbot";
+ChartJS.register(ArcElement, Tooltip, Legend);
+
 const BACKEND_URL = "https://inspectia-web.onrender.com";
 function Dashboard() {
   const { user } = useUser();
@@ -239,6 +246,7 @@ function Dashboard() {
 
   return (
     <div className="max-w-6xl mx-auto py-10 px-4">
+    
       {/* Popup de éxito al crear proyecto, asignar usuarios o generar casos */}
       {successPopup && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -264,83 +272,84 @@ function Dashboard() {
       </h1>
 
       {/* ----------------- CLIENTE ----------------- */}
-      {user.rol === "cliente" && (
-        <>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">Mis Proyectos</h2>
-            <button
-              onClick={() => setModalOpen(true)}
-              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+{user.rol === "cliente" && (
+  <>
+    <Chatbot />
+
+    <div className="flex justify-between items-center mb-6">
+      <h2 className="text-xl font-semibold">Mis Proyectos</h2>
+      
+      <button
+        onClick={() => setModalOpen(true)}
+        className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+      >
+        + Nuevo Proyecto
+      </button>
+    </div>
+
+    {proyectos.length === 0 ? (
+      <p>No tienes proyectos registrados.</p>
+    ) : (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {proyectosOrden
+          .map((id) => proyectos.find((p) => p.id === id))
+          .filter(Boolean)
+          .map((p) => (
+            <div
+              key={p.id}
+              className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500"
             >
-              + Nuevo Proyecto
-            </button>
-          </div>
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-lg font-bold">{p.nombre_proyecto}</h2>
+                <span className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">
+                  {p.estado || "En Progreso"}
+                </span>
+              </div>
+              <p className="text-gray-600">{p.descripcion}</p>
+              <p className="text-sm text-gray-500 mt-2">
+                creado:{" "}
+                {p.fecha_creacion
+                  ? new Date(p.fecha_creacion).toLocaleDateString("es-ES", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "Pendiente"}
+                {" • "}
+                {p.total_casos || 0} casos generados
+              </p>
 
-          {proyectos.length === 0 ? (
-            <p>No tienes proyectos registrados.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {proyectosOrden
-                .map((id) => proyectos.find((p) => p.id === id))
-                .filter(Boolean)
-                .map((p) => (
-                  <div
-                    key={p.id}
-                    className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500"
+              <div className="mt-4 flex gap-3">
+                <button
+                  onClick={() => verCasos(p.id)}
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                >
+                  Ver Detalles
+                </button>
+
+                {p.archivo_hu && (
+                  <a
+                    href={`${BACKEND_URL}/proyectos/${p.id}/hu`}
+                    className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
                   >
-                    <div className="flex justify-between items-center mb-2">
-                      <h2 className="text-lg font-bold">{p.nombre_proyecto}</h2>
-                      <span className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">
-                        {p.estado || "En Progreso"}
-                      </span>
-                    </div>
-                    <p className="text-gray-600">{p.descripcion}</p>
-                    <p className="text-sm text-gray-500 mt-2">
-                      creado:{" "}
-                      {p.fecha_creacion
-                        ? new Date(p.fecha_creacion).toLocaleDateString(
-                            "es-ES",
-                            {
-                              day: "2-digit",
-                              month: "short",
-                              year: "numeric",
-                            }
-                          )
-                        : "Pendiente"}
-                      {" • "}
-                      {p.total_casos || 0} casos generados
-                    </p>
-
-                    <div className="mt-4 flex gap-3">
-                      <button
-                        onClick={() => verCasos(p.id)} // 👈 ahora guarda en cookies
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-                      >
-                        Ver Detalles
-                      </button>
-
-                      {p.archivo_hu && (
-                        <a
-                          href={`${BACKEND_URL}/proyectos/${p.id}/hu`}
-                          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
-                        >
-                          Descargar HU
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                    Descargar HU
+                  </a>
+                )}
+              </div>
             </div>
-          )}
+          ))}
+      </div>
+    )}
 
-          <NuevoProyectoModal
-            isOpen={modalOpen}
-            onClose={() => setModalOpen(false)}
-            usuarioId={user.id}
-            onProyectoCreado={handleProyectoCreado}
-          />
-        </>
-      )}
+    <NuevoProyectoModal
+      isOpen={modalOpen}
+      onClose={() => setModalOpen(false)}
+      usuarioId={user.id}
+      onProyectoCreado={handleProyectoCreado}
+    />
+  </>
+)}
+
 
       {/* ----------------- MANAGER ----------------- */}
       {user.rol === "manager" && (

@@ -1,9 +1,7 @@
 import React, { useEffect } from "react";
 import { Shield, CheckCircle, Award } from "lucide-react";
-import Navbar from "../components/Navbar.jsx";
-import Footer from "../components/Footer.jsx";
 import { useNavigate } from "react-router-dom";
-import GeminiChatBot from "../components/GeminiChatBot.jsx";
+import GeminiChatBot from "../components/Geminichat1.jsx";
 import { useUser } from "../components/UserContext";
 
 function Landing() {

@@ -11,6 +11,49 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const API_KEY = "AIzaSyBqUaK5uLKOb0DXV0JjQGFPwkTeYWURXVE";
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
 
+const obtenerCasosPorEstado = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // 🔹 Obtener proyecto
+    const { data: proyectoData, error: errorProyecto } = await supabase
+      .from("proyectos")
+      .select("nombre_proyecto")
+      .eq("id", id)
+      .single();
+
+    if (errorProyecto) throw errorProyecto;
+
+    // 🔹 Obtener casos por estado
+    const { data: casosData, error: errorCasos } = await supabase
+      .from("casos_prueba")
+      .select("estado")
+      .eq("proyecto_id", id);
+
+    if (errorCasos) throw errorCasos;
+
+    // Agrupar resultados
+    const casosGrouped = {};
+    casosData.forEach(c => {
+      casosGrouped[c.estado] = (casosGrouped[c.estado] || 0) + 1;
+    });
+
+    // Respuesta para el frontend
+    res.json({
+      proyecto: proyectoData.nombre_proyecto,
+      casos: Object.entries(casosGrouped).map(([estado, total]) => ({
+        estado,
+        total,
+      })),
+    });
+  } catch (error) {
+    console.error("Error al obtener casos por estado:", error);
+    res.status(500).json({ error: "Error al obtener casos por estado" });
+  }
+};
+
+
+
 // Registro de usuario
 const registerUser = async (req, res) => {
   const { email, password, nombre, apellido, telefono, empresa, rol } = req.body;
@@ -969,9 +1012,46 @@ const getEvidenciasByEjecucion = async (req, res) => {
   }
 };
 
+const obtenerProyectoConCasosPorNombre = async (req, res) => {
+  const { nombre } = req.params;
+
+  try {
+    // 1️⃣ Traer proyecto por nombre (case-insensitive, permite espacios)
+    const { data: proyecto, error: errorProyecto } = await supabase
+      .from("proyectos")
+      .select("*")
+      .ilike("nombre_proyecto", nombre)
+      .single();
+
+    if (errorProyecto) throw errorProyecto;
+
+    if (!proyecto) {
+      return res.status(404).json({ error: "Proyecto no encontrado" });
+    }
+
+    // 2️⃣ Traer casos de prueba asociados
+    const { data: casos, error: errorCasos } = await supabase
+      .from("casos_prueba")
+      .select("*")
+      .eq("proyecto_id", proyecto.id);
+
+    if (errorCasos) throw errorCasos;
+
+    // 3️⃣ Enviar todo al frontend
+    res.json({
+      proyecto,
+      casos,
+    });
+  } catch (error) {
+    console.error("Error al obtener proyecto con casos:", error);
+    res.status(500).json({ error: "Error al obtener proyecto con casos" });
+  }
+};
+
 
 module.exports = {
-  
+  obtenerProyectoConCasosPorNombre,
+  obtenerCasosPorEstado,
   registerUser,
   loginUser,
   getUserById,
