@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Shield, CheckCircle, Award } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import GeminiChatBot from "../components/Geminichat1.jsx";
@@ -7,9 +7,11 @@ import { useUser } from "../components/UserContext";
 function Landing() {
   const navigate = useNavigate();
   const { user } = useUser(); // Obtener usuario del contexto
+  const [loading, setLoading] = useState(true); // Estado para el popup
 
   // Ahora isLoggedIn depende del contexto
   const isLoggedIn = !!user;
+
   useEffect(() => {
     const wakeUpBackend = async () => {
       try {
@@ -17,11 +19,29 @@ function Landing() {
         console.log("✅ Backend despierto");
       } catch (error) {
         console.error("⚠️ No se pudo despertar el backend:", error);
+      } finally {
+        setLoading(false); // Ocultar popup cuando finalice
       }
     };
 
     wakeUpBackend();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+          <div className="bg-white p-8 rounded-xl shadow-xl border text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-600 border-t-transparent mx-auto mb-4"></div>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Cargando Backend...
+            </h2>
+          <p className="text-gray-600 mt-2">
+            Por favor espera mientras iniciamos el servidor.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -51,6 +71,8 @@ function Landing() {
           )}
         </div>
       </section>
+
+      {/* --- resto del contenido igual --- */}
 
       <section id="servicios" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -227,6 +249,7 @@ function Landing() {
         </div>
       </section>
 
+      {/* Tipos de pruebas */}
       <section id="tipos" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
