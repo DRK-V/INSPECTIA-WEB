@@ -33,10 +33,10 @@ function Landing() {
           <div className="bg-white p-8 rounded-xl shadow-xl border text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-600 border-t-transparent mx-auto mb-4"></div>
             <h2 className="text-xl font-semibold text-gray-900">
-              Cargando Backend...
+              Cargando Información...
             </h2>
           <p className="text-gray-600 mt-2">
-            Por favor espera mientras iniciamos el servidor.
+            Por favor espera mientras iniciamos.
           </p>
         </div>
       </div>
