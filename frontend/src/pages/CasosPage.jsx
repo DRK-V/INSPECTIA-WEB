@@ -117,7 +117,7 @@ export default function CasosPage() {
     <div className="p-2 sm:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-2">
         <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-          <span role="img" aria-label="clipboard">📋</span>
+         
           Casos de Prueba - Proyecto {id}
         </h2>
         <Link

@@ -21,43 +21,49 @@ function GeminiChatBot() {
     return landing ? landing.innerText : document.body.innerText;
   };
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
-    const userMsg = { from: "user", text: input };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-    setLoading(true);
+const handleSend = async () => {
+  if (!input.trim()) return;
+  const userMsg = { from: "user", text: input };
+  setMessages((prev) => [...prev, userMsg]);
+  setInput("");
+  setLoading(true);
 
-    try {
-      // Incluye el contexto de la landing en el prompt
-      const context = getLandingContext();
-      const prompt = `Contexto de la página: ${context}\n\nPregunta del usuario: ${input}`;
+  try {
+    const context = getLandingContext();
+    const prompt = `
+Eres un asistente en una landing page.
+Tu tarea es responder de forma resumida, clara y útil (máximo 3-4 oraciones).
+Enfócate en lo esencial y evita divagar.
 
-      const res = await fetch(ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-        }),
-      });
-      const data = await res.json();
-      // Extrae la respuesta del modelo Gemini
-      const geminiResponse =
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
-        data.response ||
-        "No tengo respuesta en este momento.";
-      setMessages((prev) => [
-        ...prev,
-        { from: "bot", text: geminiResponse },
-      ]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        { from: "bot", text: "Ocurrió un error al consultar Gemini." },
-      ]);
-    }
-    setLoading(false);
-  };
+Contexto de la página: ${context}
+
+Pregunta del usuario: ${input}
+    `;
+
+    const res = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+      }),
+    });
+
+    const data = await res.json();
+    const geminiResponse =
+      data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      data.response ||
+      "No tengo respuesta en este momento.";
+
+    setMessages((prev) => [...prev, { from: "bot", text: geminiResponse }]);
+  } catch (err) {
+    setMessages((prev) => [
+      ...prev,
+      { from: "bot", text: "Ocurrió un error al consultar Gemini." },
+    ]);
+  }
+  setLoading(false);
+};
+
 
   return (
     <>
