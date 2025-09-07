@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useUser } from "../components/UserContext";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +5,7 @@ import NuevoProyectoModal from "../components/NuevoProyectoModal";
 import Cookies from "js-cookie"; // 👈 Importamos cookies
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-import { ChevronDown, ChevronUp } from "lucide-react"; 
+import { ChevronDown, ChevronUp } from "lucide-react";
 import Chatbot from "../components/Chatbot";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -25,6 +24,33 @@ function Dashboard() {
   const [popupMsg, setPopupMsg] = useState(""); // Mensaje dinámico para el popup
   const [loadingGenerar, setLoadingGenerar] = useState(false); // Estado de loading para generación de casos
   const navigate = useNavigate();
+ const [validacionPopup, setValidacionPopup] = useState({ open: false, msg: "" });
+ useEffect(() => {
+  if (validacionPopup.open) {
+    const timer = setTimeout(() => {
+      setValidacionPopup({ open: false, msg: "" });
+    }, 5000); // 5 segundos
+    return () => clearTimeout(timer);
+  }
+}, [validacionPopup]);
+
+  const validarAccionCliente = (proyecto, accion) => {
+    if (!proyecto.total_casos || proyecto.total_casos === 0) {
+      setValidacionPopup({
+        open: true,
+        msg: `El proyecto "${proyecto.nombre_proyecto}" aún está en estado pendiente. No tiene casos generados.`,
+      });
+      return false;
+    }
+
+    if (accion === "ver") {
+      verCasos(proyecto.id);
+    } else if (accion === "reporte") {
+      window.location.href = `${BACKEND_URL}/proyectos/nombre/${encodeURIComponent(
+        proyecto.nombre_proyecto
+      )}/reporte`;
+    }
+  };
 
   //  Cargar proyectos
   useEffect(() => {
@@ -246,7 +272,6 @@ function Dashboard() {
 
   return (
     <div className="max-w-6xl mx-auto py-10 px-4">
-    
       {/* Popup de éxito al crear proyecto, asignar usuarios o generar casos */}
       {successPopup && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -272,84 +297,103 @@ function Dashboard() {
       </h1>
 
       {/* ----------------- CLIENTE ----------------- */}
-{user.rol === "cliente" && (
-  <>
-    <Chatbot />
+      {user.rol === "cliente" && (
+        <>
+          <Chatbot />
 
-    <div className="flex justify-between items-center mb-6">
-      <h2 className="text-xl font-semibold">Mis Proyectos</h2>
-      
-      <button
-        onClick={() => setModalOpen(true)}
-        className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-      >
-        + Nuevo Proyecto
-      </button>
-    </div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold">Mis Proyectos</h2>
 
-    {proyectos.length === 0 ? (
-      <p>No tienes proyectos registrados.</p>
-    ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {proyectosOrden
-          .map((id) => proyectos.find((p) => p.id === id))
-          .filter(Boolean)
-          .map((p) => (
-            <div
-              key={p.id}
-              className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500"
+            <button
+              onClick={() => setModalOpen(true)}
+              className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
             >
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-bold">{p.nombre_proyecto}</h2>
-                <span className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">
-                  {p.estado || "En Progreso"}
-                </span>
-              </div>
-              <p className="text-gray-600">{p.descripcion}</p>
-              <p className="text-sm text-gray-500 mt-2">
-                creado:{" "}
-                {p.fecha_creacion
-                  ? new Date(p.fecha_creacion).toLocaleDateString("es-ES", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })
-                  : "Pendiente"}
-                {" • "}
-                {p.total_casos || 0} casos generados
-              </p>
+              + Nuevo Proyecto
+            </button>
+          </div>
 
-              <div className="mt-4 flex gap-3">
-                <button
-                  onClick={() => verCasos(p.id)}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
-                >
-                  Ver Detalles
-                </button>
-
-                {p.archivo_hu && (
-                  <a
-                    href={`${BACKEND_URL}/proyectos/${p.id}/hu`}
-                    className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
+          {proyectos.length === 0 ? (
+            <p>No tienes proyectos registrados.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {proyectosOrden
+                .map((id) => proyectos.find((p) => p.id === id))
+                .filter(Boolean)
+                .map((p) => (
+                  <div
+                    key={p.id}
+                    className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500"
                   >
-                    Descargar HU
-                  </a>
-                )}
-              </div>
-            </div>
-          ))}
-      </div>
-    )}
+                    <div className="flex justify-between items-center mb-2">
+                      <h2 className="text-lg font-bold">{p.nombre_proyecto}</h2>
+                      <span className="bg-green-100 text-green-700 text-sm px-3 py-1 rounded-full">
+                        {p.estado || "En Progreso"}
+                      </span>
+                    </div>
+                    <p className="text-gray-600">{p.descripcion}</p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      creado:{" "}
+                      {p.fecha_creacion
+                        ? new Date(p.fecha_creacion).toLocaleDateString(
+                            "es-ES",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )
+                        : "Pendiente"}
+                      {" • "}
+                      {p.total_casos || 0} casos generados
+                    </p>
 
-    <NuevoProyectoModal
-      isOpen={modalOpen}
-      onClose={() => setModalOpen(false)}
-      usuarioId={user.id}
-      onProyectoCreado={handleProyectoCreado}
-    />
-  </>
+                    <div className="mt-4 flex gap-3">
+                      <button
+                        onClick={() => validarAccionCliente(p, "ver")}
+                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+                      >
+                        Ver Detalles
+                      </button>
+
+                      {p.archivo_hu && (
+                        <a
+                          href={`${BACKEND_URL}/proyectos/${p.id}/hu`}
+                          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
+                        >
+                          Descargar HU
+                        </a>
+                      )}
+
+                      {/* Nuevo botón de reporte */}
+
+                      <button
+                        onClick={() => validarAccionCliente(p, "reporte")}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                      >
+                        Descargar Reporte
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+          {validacionPopup.open && (
+  <div className="fixed inset-0 flex items-center justify-center z-50">
+    <div className="bg-red-500/80 border border-red-600 text-black px-8 py-5 rounded-lg shadow-lg text-center max-w-md">
+      <span className="font-semibold text-lg">{validacionPopup.msg}</span>
+    </div>
+  </div>
 )}
 
+
+          <NuevoProyectoModal
+            isOpen={modalOpen}
+            onClose={() => setModalOpen(false)}
+            usuarioId={user.id}
+            onProyectoCreado={handleProyectoCreado}
+          />
+        </>
+      )}
 
       {/* ----------------- MANAGER ----------------- */}
       {user.rol === "manager" && (

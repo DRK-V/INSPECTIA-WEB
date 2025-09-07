@@ -10,6 +10,8 @@ const fetch = require("node-fetch");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const API_KEY = "AIzaSyBqUaK5uLKOb0DXV0JjQGFPwkTeYWURXVE";
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
+const PDFDocument = require("pdfkit");
+const { createCanvas } = require("canvas");
 
 const obtenerCasosPorEstado = async (req, res) => {
   const { id } = req.params;
@@ -1049,7 +1051,340 @@ const obtenerProyectoConCasosPorNombre = async (req, res) => {
 };
 
 
+
+// 🔹 Función: contar casos por estado
+function contarCasosPorEstado(casos) {
+  const conteo = {};
+  casos.forEach(c => {
+    conteo[c.estado] = (conteo[c.estado] || 0) + 1;
+  });
+  return conteo;
+}
+
+// 🔹 Generar gráfico circular (SIN leyenda)
+function generarGraficoCircular(datos) {
+  const canvas = createCanvas(500, 500);
+  const ctx = canvas.getContext("2d");
+
+  // Fondo blanco
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, 500, 500);
+
+  const centerX = 250;
+  const centerY = 200;
+  const radius = 120;
+  const total = Object.values(datos).reduce((a, b) => a + b, 0) || 1;
+  const colores = ["#3498db", "#2ecc71", "#f39c12", "#9b59b6", "#e74c3c", "#1abc9c", "#34495e", "#f1c40f"];
+
+  let startAngle = -Math.PI / 2; 
+  let colorIndex = 0;
+
+  // Dibujar las porciones del gráfico
+  for (const value of Object.values(datos)) {
+    const sliceAngle = (value / total) * Math.PI * 2;
+    const color = colores[colorIndex % colores.length];
+
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    startAngle += sliceAngle;
+    colorIndex++;
+  }
+
+  return canvas.toBuffer();
+}
+
+const generarReporteProyecto = async (req, res) => {
+  try {
+    const { nombre_proyectos } = req.params;
+
+    // Proyecto
+    const { data: proyecto, error: errorProyecto } = await supabase
+      .from("proyectos")
+      .select("*")
+      .ilike("nombre_proyecto", nombre_proyectos)
+      .single();
+
+    if (errorProyecto || !proyecto) {
+      return res.status(404).json({ message: "Proyecto no encontrado." });
+    }
+
+    // Casos
+    const { data: casos, error: errorCasos } = await supabase
+      .from("casos_prueba")
+      .select("*")
+      .eq("proyecto_id", proyecto.id);
+
+    if (errorCasos) {
+      return res.status(500).json({ message: "Error obteniendo casos." });
+    }
+
+    // Usuario asignado
+    let usuarioAsignado = "Sin asignar";
+    if (proyecto.asignado_a) {
+      try {
+        const response = await fetch(`https://inspectia-web.onrender.com/users`);
+        if (response.ok) {
+          const usuarios = await response.json();
+          const usuario = usuarios.find(u => u.id === proyecto.asignado_a);
+          if (usuario) {
+           usuarioAsignado = `${usuario.nombre} ${usuario.apellido} rol: ${usuario.rol}`;
+
+          }
+        }
+      } catch (error) {
+        console.warn("⚠️ Error obteniendo información del usuario:", error);
+        usuarioAsignado = "Error al cargar usuario";
+      }
+    }
+
+    // Métricas
+    const metricasEstado = contarCasosPorEstado(casos);
+
+    // Crear PDF
+    const doc = new PDFDocument({
+      margin: 60,
+      size: "A4",
+      bufferPages: true
+    });
+
+    const fileName = `Reporte_${nombre_proyectos.replace(/\s+/g, "_")}.pdf`;
+    const filePath = require("path").join(__dirname, `../documents/${fileName}`);
+
+    // Asegurar directorio
+    const dir = require("path").dirname(filePath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    // ====== PÁGINA 1 ======
+    doc.fontSize(24)
+      .fillColor("#2c3e50")
+      .font("Helvetica-Bold")
+      .text("INSPECTIA WEB", { align: "center" })
+      .fontSize(18)
+      .font("Helvetica")
+      .text("Reporte de Proyecto", { align: "center" })
+      .moveDown(2);
+
+    doc.strokeColor("#3498db")
+      .lineWidth(3)
+      .moveTo(doc.page.margins.left, doc.y)
+      .lineTo(doc.page.width - doc.page.margins.right, doc.y)
+      .stroke()
+      .moveDown(2);
+
+    // Información del proyecto
+    const infoBoxY = doc.y;
+    const boxWidth = doc.page.width - (doc.page.margins.left + doc.page.margins.right);
+    const boxHeight = 200;
+
+    doc.rect(doc.page.margins.left, infoBoxY, boxWidth, boxHeight)
+      .fillAndStroke("#f8f9fa", "#dee2e6");
+
+    doc.y = infoBoxY + 15;
+    doc.fontSize(16)
+      .fillColor("#2c3e50")
+      .font("Helvetica-Bold")
+      .text("INFORMACIÓN DEL PROYECTO", doc.page.margins.left + 15);
+
+    const infoData = [
+      ["Nombre", proyecto.nombre_proyecto || "N/A"],
+      ["Estado", proyecto.estado || "N/A"],
+      ["Fecha de Creación", proyecto.fecha_creacion ? new Date(proyecto.fecha_creacion).toLocaleDateString("es-ES") : "N/A"],
+      ["Asignado a", usuarioAsignado],
+      ["Tipo de Aplicación", Array.isArray(proyecto.tipo_aplicacion) ? proyecto.tipo_aplicacion.join(", ") : (proyecto.tipo_aplicacion || "N/A")]
+    ];
+
+    doc.y = infoBoxY + 45;
+    doc.fontSize(11).font("Helvetica");
+
+    infoData.forEach(([label, value]) => {
+      doc.fillColor("#495057")
+        .text(`${label}:`, doc.page.margins.left + 30, doc.y, { continued: true, width: 140 })
+        .fillColor("#212529")
+        .text(` ${value}`, { width: boxWidth - 200 });
+      doc.moveDown(0.8);
+    });
+
+    // Resumen de casos
+    doc.moveDown(2);
+    const totalCases = casos.length;
+
+    doc.fontSize(16)
+      .fillColor("#2c3e50")
+      .font("Helvetica-Bold")
+      .text("RESUMEN DE CASOS DE PRUEBA", { align: "center" })
+      .moveDown(1);
+
+    const statsY = doc.y;
+    const statBoxWidth = (boxWidth - 40) / 3;
+
+    const stats = [
+      { label: "Total de Casos", value: totalCases, color: "#3498db" }
+    ];
+
+    stats.forEach((stat) => {
+      const centeredX = (doc.page.width - statBoxWidth) / 2;
+
+      doc.rect(centeredX, statsY, statBoxWidth, 80)
+        .fillAndStroke(stat.color, stat.color);
+
+      doc.fontSize(24)
+        .fillColor("#ffffff")
+        .font("Helvetica-Bold")
+        .text(stat.value.toString(), centeredX, statsY + 20, { width: statBoxWidth, align: "center" });
+
+      doc.fontSize(10)
+        .font("Helvetica")
+        .text(stat.label, centeredX, statsY + 55, { width: statBoxWidth, align: "center" });
+    });
+
+    // ====== PÁGINA 2 ======
+    doc.addPage();
+
+    doc.fontSize(20)
+      .fillColor("#2c3e50")
+      .font("Helvetica-Bold")
+      .text("ANÁLISIS POR ESTADOS", { align: "center" })
+      .moveDown(2);
+
+    if (Object.keys(metricasEstado).length > 0) {
+      doc.fontSize(14)
+        .fillColor("#2c3e50")
+        .font("Helvetica-Bold")
+        .text("Distribución por Estado de Casos", { align: "center" })
+        .moveDown(1);
+
+      const grafEstado = generarGraficoCircular(metricasEstado);
+      const currentY = doc.y;
+
+      const imageWidth = 250;
+      const imageHeight = 250;
+      const leftX = doc.page.margins.left + 40;
+      const legendX = leftX + imageWidth + 40;
+      const legendY = currentY + 30;
+
+      doc.image(grafEstado, leftX, currentY, { width: imageWidth, height: imageHeight });
+
+      const colors = ["#3498db", "#e74c3c", "#2ecc71", "#f1c40f", "#9b59b6"];
+      const estados = Object.entries(metricasEstado);
+
+      estados.forEach(([estado, cantidad], index) => {
+        const y = legendY + index * 30;
+        const color = colors[index % colors.length];
+
+        doc.rect(legendX, y, 15, 15).fillAndStroke(color, "#2c3e50");
+
+        doc.fontSize(11)
+          .fillColor("#2c3e50")
+          .font("Helvetica")
+          .text(`${estado}: ${cantidad}`, legendX + 25, y);
+      });
+
+      doc.y = currentY + imageHeight + 40;
+    }
+
+// ====== Texto centrado DETALLE POR ESTADOS ======
+doc.moveDown(2);
+doc.fontSize(14)
+  .font("Helvetica-Bold")
+  .fillColor("#2c3e50")
+  .text("DETALLE POR ESTADOS", 0, doc.y, {
+    align: "center",
+    width: doc.page.width
+  })
+  .moveDown(1);
+
+// ====== Tabla ======
+const tableData = Object.entries(metricasEstado);
+if (tableData.length > 0) {
+  const tableY = doc.y;
+  const tableWidth = 300;
+  const tableX = (doc.page.width - tableWidth) / 2;
+  const rowHeight = 30;
+
+  // Encabezado
+  doc.rect(tableX, tableY, tableWidth, rowHeight)
+    .fillAndStroke("#3498db", "#2c3e50");
+
+  doc.fontSize(12)
+    .fillColor("#ffffff")
+    .font("Helvetica-Bold")
+    .text("Estado", tableX + 10, tableY + 10, { width: 200 })
+    .text("Cantidad", tableX + 210, tableY + 10, { width: 80, align: "center" });
+
+  // Filas
+  tableData.forEach(([estado, cantidad], index) => {
+    const y = tableY + ((index + 1) * rowHeight);
+    const bgColor = index % 2 === 0 ? "#f8f9fa" : "#ffffff";
+
+    doc.rect(tableX, y, tableWidth, rowHeight)
+      .fillAndStroke(bgColor, "#dee2e6");
+
+    doc.fontSize(11)
+      .fillColor("#2c3e50")
+      .font("Helvetica")
+      .text(estado, tableX + 10, y + 10, { width: 200 })
+      .text(cantidad.toString(), tableX + 210, y + 10, { width: 80, align: "center" });
+  });
+}
+
+// ====== Pie de página solo en la última página ======
+const pageCount = doc.bufferedPageRange().count;
+doc.switchToPage(pageCount - 1);
+
+doc.fontSize(8)
+  .fillColor("#6c757d")
+  .font("Helvetica")
+  .text(
+    `Generado el ${new Date().toLocaleDateString("es-ES")}`,
+    doc.page.margins.left,
+    doc.page.height - 30,
+    { width: doc.page.width - (doc.page.margins.left + doc.page.margins.right), align: "center" }
+  );
+
+
+    doc.end();
+
+    stream.on("finish", () => {
+      res.download(filePath, fileName, (err) => {
+        if (err) {
+          console.error("❌ Error enviando PDF:", err);
+          return res.status(500).json({ message: "Error enviando el archivo PDF." });
+        }
+        try {
+          fs.unlinkSync(filePath);
+        } catch (unlinkErr) {
+          console.warn("⚠️ No se pudo eliminar el archivo temporal:", unlinkErr);
+        }
+      });
+    });
+
+    stream.on("error", (err) => {
+      console.error("❌ Error en el stream del PDF:", err);
+      res.status(500).json({ message: "Error generando el archivo PDF." });
+    });
+
+  } catch (error) {
+    console.error("❌ Error generando reporte:", error);
+    res.status(500).json({ message: "Error interno del servidor." });
+  }
+};
+
+
 module.exports = {
+  generarReporteProyecto,
   obtenerProyectoConCasosPorNombre,
   obtenerCasosPorEstado,
   registerUser,

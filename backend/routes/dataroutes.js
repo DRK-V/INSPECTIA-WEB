@@ -2,12 +2,14 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../middleware/upload");
 const {
+
   obtenerCasosPorEstado,
   obtenerProyectoConCasosPorNombre,
   // Usuarios
   registerUser,
   loginUser,
   getUserById,
+  generarReporteProyecto,
   // Proyectos
   getProyectoById,
   createProyecto,
@@ -525,4 +527,5 @@ router.put("/:id/estado", (req, res, next) => {
 
 router.get("/proyectos/:id/casos-ejecuciones", obtenerCasosPorEstado);
 router.get("/proyectos/nombre/:nombre", obtenerProyectoConCasosPorNombre);
+router.get("/proyectos/nombre/:nombre_proyectos/reporte", generarReporteProyecto);
 module.exports = router;
