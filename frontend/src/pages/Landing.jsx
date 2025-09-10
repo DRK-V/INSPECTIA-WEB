@@ -44,32 +44,63 @@ function Landing() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 flex flex-col pt-16">
       {/* Chat bot flotante */}
       <GeminiChatBot />
 
-      <section className="bg-gray-100 py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Gestión de Pruebas QA
-            <br />
-            con <span className="text-purple-600">Inteligencia Artificial</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Plataforma profesional para la gestión de pruebas de calidad
-            asistida por IA.
-            <br />
-            Optimiza tus procesos de testing con tecnología de vanguardia.
-          </p>
-          {!isLoggedIn && (
-            <button
-              className="bg-black text-white px-8 py-4 rounded-md text-lg font-medium hover:bg-gray-800 transition-colors"
-              onClick={() => navigate("/login")}
-            >
-              Solicitar Servicio
-            </button>
-          )}
+      {/* Hero Section with Modern Design */}
+      <section className="relative bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 py-24 overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-purple-500/10 to-indigo-500/10 rounded-full blur-3xl"></div>
         </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="animate-fade-in-up">
+            <div className="inline-flex items-center px-4 py-2 mb-8 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
+              <span className="text-purple-300 text-sm font-medium">✨ Potenciado por Inteligencia Artificial</span>
+            </div>
+            
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
+              Gestión de Pruebas QA
+              <br />
+              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
+                Nueva Generación
+              </span>
+            </h1>
+            
+            <p className="text-xl md:text-2xl text-slate-300 mb-10 max-w-4xl mx-auto leading-relaxed">
+              Plataforma profesional para la gestión de pruebas de calidad asistida por IA.
+              <span className="block mt-2 text-purple-300 font-medium">
+                Optimiza tus procesos de testing con tecnología de vanguardia.
+              </span>
+            </p>
+            
+            {!isLoggedIn && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button
+                  className="group relative px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-lg font-semibold shadow-2xl transform transition-all duration-300 hover:scale-105 hover:shadow-purple-500/25 border border-purple-500/20"
+                  onClick={() => navigate("/login")}
+                >
+                  <span className="relative z-10">Solicitar Servicio</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-indigo-700 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+                
+                <button
+                  onClick={() => handleNavClick("servicios")}
+                  className="px-8 py-4 border-2 border-white/30 text-white rounded-xl text-lg font-medium hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
+                >
+                  Conocer Más
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Decorative Elements */}
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-50 to-transparent"></div>
       </section>
 
       {/* --- resto del contenido igual --- */}

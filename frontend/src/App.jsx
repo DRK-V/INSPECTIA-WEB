@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { UserProvider } from "./components/UserContext";
+import { ToastProvider } from "./components/Toast";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Navbar from "./components/Navbar.jsx";
@@ -15,27 +16,29 @@ import Usuarios from "./pages/Usuarios.jsx";
 export default function App() {
   return (
     <UserProvider>
-      <div className="flex flex-col min-h-screen">
-        {/* Navbar siempre arriba */}
-        <Navbar />
+      <ToastProvider>
+        <div className="flex flex-col min-h-screen">
+          {/* Navbar siempre arriba */}
+          <Navbar />
 
-        {/* Contenido dinámico */}
-        <main className="flex-grow pt-16"> 
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/proyecto/:id" element={<ProyectoDetalles />} />
-             <Route path="/proyectos/:id/casos" element={<CasosPage />} />
-             <Route path="/proyectos/:id/casos/:casoId" element={<CasoDetalle />} />
-             <Route path="/usuarios" element={<Usuarios />} />
-          </Routes>
-        </main>
+          {/* Contenido dinámico */}
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/proyecto/:id" element={<ProyectoDetalles />} />
+              <Route path="/proyectos/:id/casos" element={<CasosPage />} />
+              <Route path="/proyectos/:id/casos/:casoId" element={<CasoDetalle />} />
+              <Route path="/usuarios" element={<Usuarios />} />
+            </Routes>
+          </main>
 
-        {/* Footer siempre abajo */}
-        <Footer />
-      </div>
+          {/* Footer siempre abajo */}
+          <Footer />
+        </div>
+      </ToastProvider>
     </UserProvider>
   );
 }
