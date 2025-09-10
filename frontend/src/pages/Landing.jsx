@@ -59,9 +59,7 @@ function Landing() {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="animate-fade-in-up">
-            <div className="inline-flex items-center px-4 py-2 mb-8 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
-              <span className="text-purple-300 text-sm font-medium">✨ Potenciado por Inteligencia Artificial</span>
-            </div>
+            
             
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
               Gestión de Pruebas QA
@@ -88,12 +86,7 @@ function Landing() {
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-700 to-indigo-700 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>
                 
-                <button
-                  onClick={() => handleNavClick("servicios")}
-                  className="px-8 py-4 border-2 border-white/30 text-white rounded-xl text-lg font-medium hover:bg-white/10 transition-all duration-300 backdrop-blur-sm"
-                >
-                  Conocer Más
-                </button>
+               
               </div>
             )}
           </div>
